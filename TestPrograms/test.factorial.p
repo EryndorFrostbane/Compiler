@@ -1,0 +1,28 @@
+{
+  /*
+    Programa para ler um numero do usuario, calcular seu fatorial
+    e exibir o resultado.
+  */
+
+  inteiro numero;
+  inteiro fatorial;
+  inteiro i;
+
+  /*
+    A especificação não menciona, então estou assumindo que a rotina
+    "mostrar" é capaz de exibir strings.
+  */
+  mostrar("Digite um numero para calcular o fatorial: ");
+  ler(numero);
+
+  fatorial = 1;
+  i = 1;
+
+  enquanto (i <= numero) {
+    fatorial = fatorial * i;
+    i = i + 1;
+  }
+
+  mostrar(fatorial);
+}
+
