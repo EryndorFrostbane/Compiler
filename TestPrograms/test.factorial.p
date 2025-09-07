@@ -8,11 +8,6 @@
   inteiro fatorial;
   inteiro i;
 
-  /*
-    A especificação não menciona, então estou assumindo que a rotina
-    "mostrar" é capaz de exibir strings.
-  */
-  mostrar("Digite um numero para calcular o fatorial: ");
   ler(numero);
 
   fatorial = 1;
