@@ -57,5 +57,4 @@ dkms.conf
 
 # Flex
 lex.yy.c
-*.exe
-scanner*
+scanner
