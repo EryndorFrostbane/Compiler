@@ -3,7 +3,7 @@
 %{
 #include <stdio.h>  // fprintf()
 #include <string.h> // strdup()
-#include "scanner.h"
+#include "headers/scanner.h"
 
 /*
  * A macro YY_DECL é usada para redefinir a assinatura da função do analisador léxico.
