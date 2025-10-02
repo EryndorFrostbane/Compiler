@@ -1,20 +1,20 @@
 # Analisador Léxico
 
 Analisador léxico para a linguagem P- implementado com Flex.
+Desenvolvido e testado no Arch Linux.
 
 # Instruções
 
-1. Gere o código em C do analisador com o seguinte comando:
+1. Gere o código em C do analisador léxico com o seguinte comando:
 
 ```bash
 flex scanner.l
 ```
 
-2. Um arquivo chamado `lex.yy.c` será gerado. Você então deve compilá-lo para gerar o analisador:
+2. Um arquivo chamado `lex.yy.c` será gerado. Você então deve compilá-lo junto com a aplicação para gerar o analisador:
 
 ```bash
-# Talvez seja necessário adicionar a opção -lfl também.
-gcc lex.yy.c -o scanner
+gcc lex.yy.c main.c -o scanner
 ```
 
 3. Agora você pode executar o analisador em arquivos P-

@@ -20,4 +20,3 @@
 
   mostrar(fatorial);
 }
-
