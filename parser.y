@@ -18,17 +18,15 @@ int Error;
 
 /* Prototipos */
 static int yylex(void);
-int yyerror(char *);
+static int yyerror(char *);
 
 %}
 
 %code requires {
   #include "headers/scanner.h" // Inclui os tokens usados no analisador léxico
-  #include "headers/globals.h"
-  /*
-   * Redefine YYTOKENTYPE para usar seu enum.
-   * Isso suprime a geracao do enum padrao do Bison.
-   */
+  #include "headers/globals.h" // Inclui funções para construção da árvore sintática
+
+  /* Redefine YYTOKENTYPE para usar token_type. Isso suprime a geracao do enum padrao do Bison. */
   #define YYTOKENTYPE token_type
 }
 
@@ -267,10 +265,9 @@ int yyerror(char * message)
 }
 
 /*
- * <<< MODIFICADO: Esta e a funcao de adaptacao crucial.
- * Ela chama get_token() do seu scanner, copia os dados
- * para as variaveis globais que o parser espera (lineno, tokenString)
- * e retorna apenas o tipo do token, como o Yacc/Bison espera.
+ * Chama get_token() do seu analisador léxico, copia os dados
+ * para as variáveis globais que o analisador sintático espera (lineno, tokenString)
+ * e retorna apenas o tipo do token, como o Bison espera.
  */
 static int yylex(void)
 {
