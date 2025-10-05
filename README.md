@@ -1,6 +1,6 @@
-# Analisador Léxico
+# Compilador de P-
 
-Analisador léxico para a linguagem P- implementado com Flex.
+Compilador para a linguagem P- implementado com Flex e Bison.
 Desenvolvido e testado no Arch Linux.
 
 # Instruções
