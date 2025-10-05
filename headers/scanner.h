@@ -4,12 +4,8 @@
 /// @brief Representa todos os possíveis tipos de tokens da linguagem P-
 typedef enum token_type
 {
-    T_EOF,  // Fim do arquivo P-
-    T_ERRO,
-    T_ID,
-
     /* Palavras-chave */
-    T_INTEIRO,
+    T_INTEIRO = 258,
     T_REAL,
     T_SE,
     T_ENTAO,
@@ -19,33 +15,38 @@ typedef enum token_type
     T_ATE,
     T_LER,
     T_MOSTRAR,
-
+    T_ID,
+    
     /* Numeros */
     T_NUMERO_INT,
     T_NUMERO_REAL,
-
+    
     /* Operadores */
+    T_E,
+    T_OU,
+    T_MENOR_IGUAL,
+    T_MAIOR_IGUAL,
+    T_IGUAL,
+    T_DIFERENTE,
+    T_MENOR,
+    T_MAIOR,
     T_SOMA,
     T_SUB,
     T_MULT,
     T_DIV,
-    T_E,
-    T_OU,
-    T_MENOR,
-    T_MENOR_IGUAL,
-    T_MAIOR,
-    T_MAIOR_IGUAL,
-    T_IGUAL,
-    T_DIFERENTE,
     T_ATRIBUICAO,
-
+    
     /* Simbolos e Separadores */
-    T_PONTO_VIRGULA,
-    T_VIRGULA,
     T_ABRE_PARENTESES,
     T_FECHA_PARENTESES,
     T_ABRE_CHAVES,
-    T_FECHA_CHAVES
+    T_FECHA_CHAVES,
+    T_PONTO_VIRGULA,
+    T_VIRGULA,
+    
+    /* Finalizadores */
+    T_EOF = 0, // Fim do arquivo P-
+    T_ERRO = 1,
 } token_type;
 
 /// @brief Armazena as informações completas de um token.

@@ -3,6 +3,8 @@
 #include "headers/globals.h"
 #include "headers/parser.h"
 
+extern int yydebug;
+
 int main(int argc, char **argv)
 {
     TreeNode *syntaxTree;
@@ -23,6 +25,7 @@ int main(int argc, char **argv)
     fprintf(stdout, "Compilando o arquivo: %s\n", argv[1]);
     fprintf(stdout, "-------------------------------------\n");
 
+    yydebug = 0; // 0 desativa o debug trace, 1 ativa o debug trace
     syntaxTree = parse();
 
     if (syntaxTree != NULL)

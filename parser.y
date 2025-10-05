@@ -5,6 +5,7 @@
 #include "headers/parser.h"
 
 #define YYSTYPE TreeNode *
+#define YYDEBUG 1
 
 /* Variaveis globais usadas pelo parser */
 static char * savedName;
@@ -41,17 +42,22 @@ static int yyerror(char *);
 %token T_SOMA T_SUB T_MULT T_DIV T_ATRIBUICAO
 %token T_ABRE_PARENTESES T_FECHA_PARENTESES T_ABRE_CHAVES T_FECHA_CHAVES
 %token T_PONTO_VIRGULA T_VIRGULA
-%token T_EOF T_ERRO
+%token T_ERRO
 
+%nonassoc "then"
 %nonassoc T_SENAO 
 
 %% /* --- Gramatica (sem alteracoes) --- */
 
-program     : decl_list stmt_seq T_EOF
-                 { 
+program     : decl_list optional_stmt_seq
+                 {
                    savedTree = $2;
-                 } 
+                 }
             ;
+
+optional_stmt_seq : stmt_seq { $$ = $1; }
+                  | /* empty */ { $$ = NULL; }
+                  ;
 
 decl_list   : decl_list decl { $$ = $1; }
             | /* vazio */ { $$ = NULL; } 
@@ -65,15 +71,15 @@ id_list     : T_ID { $$ = NULL; }
             | id_list T_VIRGULA T_ID { $$ = NULL; }
             ;
 
-stmt_seq    : stmt_seq T_PONTO_VIRGULA stmt
+stmt_seq    : stmt_seq stmt
                  { YYSTYPE t = $1;
                    if (t != NULL)
                    { while (t->sibling != NULL)
                         t = t->sibling;
-                     t->sibling = $3;
-                     $$ = $1; 
+                     t->sibling = $2;
+                     $$ = $1;
                    }
-                   else $$ = $3;
+                   else $$ = $2;
                  }
             | stmt  { $$ = $1; }
             ;
@@ -86,6 +92,7 @@ stmt        : if_stmt { $$ = $1; }
             | write_stmt { $$ = $1; }
             | block_stmt { $$ = $1; }
             | error  { $$ = NULL; }
+            | /* empty */ { $$ = NULL; }
             ;
 
 block_stmt  : T_ABRE_CHAVES stmt_seq T_FECHA_CHAVES 
@@ -130,23 +137,26 @@ command     : stmt { $$ = $1; }
 assign_stmt : T_ID { savedName = copyString(tokenString);
                      savedLineNo = lineno;
                    }
-              T_ATRIBUICAO exp
+              T_ATRIBUICAO exp T_PONTO_VIRGULA /* << ADD SEMICOLON */
                  { $$ = newStmtNode(AssignK);
-                   $$->child[0] = $4;
-                   $$->attr.name = savedName;
-                   $$->lineno = savedLineNo;
+                   if ($$)
+                   {
+                       $$->child[0] = $4;
+                       $$->attr.name = savedName;
+                       $$->lineno = savedLineNo;
+                   }
                  }
             ;
 
-read_stmt   : T_LER T_ABRE_PARENTESES T_ID T_FECHA_PARENTESES
+read_stmt   : T_LER T_ABRE_PARENTESES T_ID T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
                  { $$ = newStmtNode(ReadK);
-                   $$->attr.name = copyString(tokenString);
+                   if ($$) $$->attr.name = copyString(tokenString);
                  }
             ;
 
-write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES
+write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
                  { $$ = newStmtNode(WriteK);
-                   $$->child[0] = $3;
+                   if ($$) $$->child[0] = $3;
                  }
             ;
 
