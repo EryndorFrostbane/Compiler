@@ -1,9 +1,3 @@
-/*****************************************************************/
-/* Arquivo: util.c                                               */
-/* Implementacao de funcoes e utilitarios para o compilador TINY */
-/* Compiler Construction: Principles and Practice                */
-/* Kenneth C. Louden                                             */
-/*****************************************************************/
 
 #include "headers/globals.h"
 #include "headers/scanner.h"
@@ -18,11 +12,18 @@ void printToken(token_type token, const char* tokenString) {
     case T_ATE:
     case T_LER:
     case T_MOSTRAR:
+    case T_INTEIRO:
+    case T_REAL:
       fprintf(stdout, "reserved word: %s\n",tokenString);
       break;
     case T_ATRIBUICAO: fprintf(stdout,"=\n"); break;
     case T_MENOR: fprintf(stdout,"<\n"); break;
     case T_IGUAL: fprintf(stdout,"==\n"); break;
+    case T_MENOR_IGUAL: fprintf(stdout,"<=\n"); break;
+    case T_MAIOR_IGUAL: fprintf(stdout,">=\n"); break;
+    case T_E: fprintf(stdout,"&&\n"); break;
+    case T_DIFERENTE: fprintf(stdout,"||\n"); break;
+    case T_OU: fprintf(stdout,"!=\n"); break;
     case T_ABRE_PARENTESES: fprintf(stdout,"(\n"); break;
     case T_FECHA_PARENTESES: fprintf(stdout,")\n"); break;
     case T_PONTO_VIRGULA: fprintf(stdout,";\n"); break;
@@ -31,8 +32,8 @@ void printToken(token_type token, const char* tokenString) {
     case T_MULT: fprintf(stdout,"*\n"); break;
     case T_DIV: fprintf(stdout,"/\n"); break;
     case ENDFILE: fprintf(stdout,"EOF\n"); break;
-    case T_INTEIRO:
-    case T_REAL:
+    case T_NUMERO_INT:
+    case T_NUMERO_REAL:
       fprintf(stdout, "NUM, val= %s\n",tokenString);
       break;
     case T_ID:
@@ -126,6 +127,9 @@ void printTree( TreeNode * tree ) {
         case RepeatK:
           fprintf(stdout,"Repeat\n");
           break;
+        case WhileK:
+          fprintf(stdout,"While\n");
+          break;
         case AssignK:
           fprintf(stdout,"Assign to: %s\n",tree->attr.name);
           break;
@@ -134,6 +138,9 @@ void printTree( TreeNode * tree ) {
           break;
         case WriteK:
           fprintf(stdout,"Write\n");
+          break;
+        case DeclK:
+          fprintf(stdout,"Decl: %s\n",tree->attr.name);
           break;
         default:
           fprintf(stdout,"Unknown ExpNode kind\n");

@@ -148,9 +148,12 @@ assign_stmt : T_ID { savedName = copyString(tokenString);
                  }
             ;
 
-read_stmt   : T_LER T_ABRE_PARENTESES T_ID T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
+read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = copyString(tokenString);
+                                                                savedLineNo = lineno;
+                                                              }
+                                                              T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
                  { $$ = newStmtNode(ReadK);
-                   if ($$) $$->attr.name = copyString(tokenString);
+                   if ($$) $$->attr.name = savedName;
                  }
             ;
 

@@ -43,7 +43,8 @@ typedef enum StmtKind
    WhileK,
    AssignK,
    ReadK,
-   WriteK
+   WriteK,
+   DeclK,
 } StmtKind;
 typedef enum ExpKind
 {
