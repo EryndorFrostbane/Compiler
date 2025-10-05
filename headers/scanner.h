@@ -46,7 +46,6 @@ typedef enum token_type
     T_FECHA_PARENTESES,
     T_ABRE_CHAVES,
     T_FECHA_CHAVES
-
 } token_type;
 
 /// @brief Armazena as informações completas de um token.
@@ -64,5 +63,23 @@ extern FILE *yyin;
 /// @attention O corpo desta função está em "lex.yy.c", que é gerado pelo Flex como definido em "scanner.l".
 /// @return O token atual a ser processado.
 extern token get_token(void);
+
+/*
+ * Constantes internas que o Bison espera que existam.
+ * Quando suprimimos a geracao do enum do Bison usando YYTOKENTYPE,
+ * precisamos definir estas constantes manualmente.
+ */
+#ifndef YYEMPTY
+#define YYEMPTY -2
+#endif
+#ifndef YYEOF
+#define YYEOF 0
+#endif
+#ifndef YYerror
+#define YYerror 256
+#endif
+#ifndef YYUNDEF
+#define YYUNDEF -1
+#endif
 
 #endif // SCANNER_H

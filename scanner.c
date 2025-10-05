@@ -1,6 +1,6 @@
-#include <stdio.h>      // printf(), fprintf(), fopen(), fclose()
-#include <stdlib.h>     // free()
-#include "headers/scanner.h"    // token_type, token, get_token()
+#include <stdio.h>           // printf(), fprintf(), fopen(), fclose()
+#include <stdlib.h>          // free()
+#include "headers/scanner.h" // token_type, token, get_token()
 
 /// @brief Imprime as informações de um token de forma organizada.
 /// @param token O token a ser impresso.
