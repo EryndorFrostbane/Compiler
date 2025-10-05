@@ -18,12 +18,13 @@ void printToken(token_type token, const char* tokenString) {
       break;
     case T_ATRIBUICAO: fprintf(stdout,"=\n"); break;
     case T_MENOR: fprintf(stdout,"<\n"); break;
-    case T_IGUAL: fprintf(stdout,"==\n"); break;
+    case T_MAIOR: fprintf(stdout, ">\n"); break;
+    case T_IGUAL: fprintf(stdout, "==\n"); break;
     case T_MENOR_IGUAL: fprintf(stdout,"<=\n"); break;
     case T_MAIOR_IGUAL: fprintf(stdout,">=\n"); break;
     case T_E: fprintf(stdout,"&&\n"); break;
-    case T_DIFERENTE: fprintf(stdout,"||\n"); break;
-    case T_OU: fprintf(stdout,"!=\n"); break;
+    case T_DIFERENTE: fprintf(stdout,"!=\n"); break;
+    case T_OU: fprintf(stdout,"||\n"); break;
     case T_ABRE_PARENTESES: fprintf(stdout,"(\n"); break;
     case T_FECHA_PARENTESES: fprintf(stdout,")\n"); break;
     case T_PONTO_VIRGULA: fprintf(stdout,";\n"); break;
