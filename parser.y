@@ -92,7 +92,6 @@ stmt        : if_stmt { $$ = $1; }
             | write_stmt { $$ = $1; }
             | block_stmt { $$ = $1; }
             | error  { $$ = NULL; }
-            | /* empty */ { $$ = NULL; }
             ;
 
 block_stmt  : T_ABRE_CHAVES stmt_seq T_FECHA_CHAVES 
@@ -101,7 +100,7 @@ block_stmt  : T_ABRE_CHAVES stmt_seq T_FECHA_CHAVES
 		 }
 	    ;
 
-if_stmt     : T_SE exp T_ENTAO command
+if_stmt     : T_SE exp T_ENTAO command %prec "then"
                  { 
                    $$ = newStmtNode(IfK);
                    $$->child[0] = $2;
@@ -278,7 +277,7 @@ int yyerror(char * message)
 }
 
 /*
- * Chama get_token() do seu analisador léxico, copia os dados
+ * Chama get_token() do analisador léxico, copia os dados
  * para as variáveis globais que o analisador sintático espera (lineno, tokenString)
  * e retorna apenas o tipo do token, como o Bison espera.
  */
@@ -304,7 +303,7 @@ static int yylex(void)
   tokenString = current_token.lexeme;
 
   /* Retorna o tipo do token para o parser */
-  return current_token.type;
+  return (int)current_token.type;
 }
 
 

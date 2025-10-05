@@ -37,7 +37,7 @@ flex scanner.l
 2. Gere o código em C do analisador sintático com o seguinte comando:
 
 ```bash
-bison -d parser.y
+bison parser.y
 ```
 
 3. Os aquivos `lex.yy.c` e `parser.tab.c` serão gerados. Você então deve compilá-los juntos com a aplicação para gerar o analisador:
