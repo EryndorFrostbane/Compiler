@@ -3,13 +3,13 @@
 
 #include "parser/parser.h"
 
-#define YYSTYPE TreeNode *
+#define YYSTYPE tree_node *
 #define YYDEBUG 1
 
 /* Variaveis globais usadas pelo parser */
 static char * savedName;
 static int savedLineNo;
-static TreeNode * savedTree;
+static tree_node * savedTree;
 
 /* Definicao da variavel global para o lexema do token */
 char * tokenString;
@@ -101,13 +101,13 @@ block_stmt  : T_ABRE_CHAVES stmt_seq T_FECHA_CHAVES
 
 if_stmt     : T_SE exp T_ENTAO command %prec "then"
                  { 
-                   $$ = newStmtNode(IfK);
+                   $$ = new_statement_node(IfK);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                  }
             | T_SE exp T_ENTAO command T_SENAO command
                  { 
-                   $$ = newStmtNode(IfK);
+                   $$ = new_statement_node(IfK);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                    $$->child[2] = $6;
@@ -115,7 +115,7 @@ if_stmt     : T_SE exp T_ENTAO command %prec "then"
             ;
 
 repeat_stmt : T_REPITA command T_ATE exp
-                 { $$ = newStmtNode(RepeatK);
+                 { $$ = new_statement_node(RepeatK);
                    $$->child[0] = $2; /* command */
                    $$->child[1] = $4; /* exp */
                  }
@@ -123,7 +123,7 @@ repeat_stmt : T_REPITA command T_ATE exp
 
 while_stmt  : T_ENQUANTO T_ABRE_PARENTESES exp T_FECHA_PARENTESES command
                  { 
-                   $$ = newStmtNode(WhileK);
+                   $$ = new_statement_node(WhileK);
                    $$->child[0] = $3; 
                    $$->child[1] = $5; 
                  }
@@ -132,11 +132,11 @@ while_stmt  : T_ENQUANTO T_ABRE_PARENTESES exp T_FECHA_PARENTESES command
 command     : stmt { $$ = $1; }
 	    ;
 
-assign_stmt : T_ID { savedName = copyString(tokenString);
+assign_stmt : T_ID { savedName = strdup(tokenString);
                      savedLineNo = lineno;
                    }
               T_ATRIBUICAO exp T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = newStmtNode(AssignK);
+                 { $$ = new_statement_node(AssignK);
                    if ($$)
                    {
                        $$->child[0] = $4;
@@ -146,23 +146,23 @@ assign_stmt : T_ID { savedName = copyString(tokenString);
                  }
             ;
 
-read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = copyString(tokenString);
+read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = strdup(tokenString);
                                                                 savedLineNo = lineno;
                                                               }
                                                               T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = newStmtNode(ReadK);
+                 { $$ = new_statement_node(ReadK);
                    if ($$) $$->attr.name = savedName;
                  }
             ;
 
 write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = newStmtNode(WriteK);
+                 { $$ = new_statement_node(WriteK);
                    if ($$) $$->child[0] = $3;
                  }
             ;
 
 exp         : exp T_OU log_and_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_OU;
@@ -171,7 +171,7 @@ exp         : exp T_OU log_and_exp
             ;
 
 log_and_exp : log_and_exp T_E rel_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_E;
@@ -180,37 +180,37 @@ log_and_exp : log_and_exp T_E rel_exp
             ;
 
 rel_exp     : arith_exp T_MENOR arith_exp 
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_MENOR;
                  }
             | arith_exp T_MENOR_IGUAL arith_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_MENOR_IGUAL;
                  }
             | arith_exp T_MAIOR arith_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_MAIOR;
                  }
             | arith_exp T_MAIOR_IGUAL arith_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_MAIOR_IGUAL;
                  }
             | arith_exp T_IGUAL arith_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_IGUAL;
                  }
             | arith_exp T_DIFERENTE arith_exp
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_DIFERENTE;
@@ -219,13 +219,13 @@ rel_exp     : arith_exp T_MENOR arith_exp
             ;
 
 arith_exp   : arith_exp T_SOMA term 
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_SOMA;
                  }
             | arith_exp T_SUB term
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_SUB;
@@ -234,13 +234,13 @@ arith_exp   : arith_exp T_SOMA term
             ;
 
 term        : term T_MULT factor 
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_MULT;
                  }
             | term T_DIV factor
-                 { $$ = newExpNode(OpK);
+                 { $$ = new_expression_node(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = T_DIV;
@@ -251,16 +251,16 @@ term        : term T_MULT factor
 factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
                  { $$ = $2; }
             | T_NUMERO_INT
-                 { $$ = newExpNode(ConstK);
+                 { $$ = new_expression_node(ConstK);
                    $$->attr.val = atoi(tokenString);
                  }
             | T_NUMERO_REAL
-                 { $$ = newExpNode(ConstK);
+                 { $$ = new_expression_node(ConstK);
                    $$->attr.real_val = atof(tokenString);
                  }
             | T_ID 
-                 { $$ = newExpNode(IdK);
-                   $$->attr.name = copyString(tokenString);
+                 { $$ = new_expression_node(IdK);
+                   $$->attr.name = strdup(tokenString);
                  }
             | T_ERRO { $$ = NULL; }
             ;
@@ -306,7 +306,7 @@ static int yylex(void)
 }
 
 
-TreeNode * parse(void)
+tree_node * parse(void)
 { 
   yyparse();
   return savedTree;

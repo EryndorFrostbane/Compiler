@@ -32,12 +32,12 @@ extern int Error;
 /******* Arvore sintatica para o parser  ********/
 /*************************************************/
 
-typedef enum NodeKind
+typedef enum node_kind
 {
     StmtK,
     ExpK
-} NodeKind;
-typedef enum StmtKind
+} node_kind;
+typedef enum stmt_kind
 {
     IfK,
     RepeatK,
@@ -46,33 +46,33 @@ typedef enum StmtKind
     ReadK,
     WriteK,
     DeclK,
-} StmtKind;
-typedef enum ExpKind
+} stmt_kind;
+typedef enum exp_kind
 {
     OpK,
     ConstK,
     IdK
-} ExpKind;
+} exp_kind;
 
-typedef enum ExpType
+typedef enum exp_type
 {
     Void,
     Integer,
     Boolean
-} ExpType;
+} exp_type;
 
 #define MAXCHILDREN 3
 
-typedef struct TreeNode
+typedef struct tree_node
 {
-    struct TreeNode *child[MAXCHILDREN];
-    struct TreeNode *sibling;
+    struct tree_node *child[MAXCHILDREN];
+    struct tree_node *sibling;
     int lineno;
-    NodeKind nodekind;
+    node_kind nodekind;
     union
     {
-        StmtKind stmt;
-        ExpKind exp;
+        stmt_kind stmt;
+        exp_kind exp;
     } kind;
     union
     {
@@ -81,8 +81,8 @@ typedef struct TreeNode
         double real_val;
         char *name;
     } attr;
-    ExpType type;
-} TreeNode;
+    exp_type type;
+} tree_node;
 
 /*****************************************************/
 /*********** Flags para rastreamento    ************/
@@ -96,21 +96,18 @@ extern int TraceParse;
 extern char *tokenString;
 
 /* Imprime o token e seu lexema */
-void printToken(token_type token_type, const char *lexeme);
+void print_token(token_type token_type, const char *lexeme);
 
 /* Cria um no de declaracao para construcao da arvore sintatica */
-TreeNode *newStmtNode(StmtKind kind);
+tree_node *new_statement_node(stmt_kind kind);
 
 /* Cria um no de expressao para construcao da arvore sintatica */
-TreeNode *newExpNode(ExpKind);
-
-/* Aloca espaco e faz copia de uma string */
-char *copyString(char *);
+tree_node *new_expression_node(exp_kind);
 
 /* Imprime a arvore sintatica usando indentacao para indicar as subarvores  */
-void printTree(TreeNode *);
+void print_tree(tree_node *);
 
 /* A funcao parse retorna a arvore sintatica construida */
-TreeNode * parse(void);
+tree_node * parse(void);
 
 #endif

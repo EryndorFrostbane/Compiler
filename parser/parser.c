@@ -6,7 +6,7 @@ extern int yydebug;
 
 int main(int argc, char **argv)
 {
-    TreeNode *syntaxTree;
+    tree_node *syntaxTree;
 
     if (argc < 2)
     {
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     {
         fprintf(stdout, "\nConstrucao da arvore sintatica finalizada.\n");
         fprintf(stdout, "-------------------------------------\n");
-        printTree(syntaxTree);
+        print_tree(syntaxTree);
     }
     else
     {
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 }
 
 /* Imprime um token e seu lexema no arquivo stdout */
-void printToken(token_type token, const char *tokenString)
+void print_token(token_type token, const char *tokenString)
 {
     switch (token)
     {
@@ -125,9 +125,9 @@ void printToken(token_type token, const char *tokenString)
 }
 
 /* Cria um no de declaracao para a construcao da arvore sintatica */
-TreeNode *newStmtNode(StmtKind kind)
+tree_node *new_statement_node(stmt_kind kind)
 {
-    TreeNode *t = (TreeNode *)malloc(sizeof(TreeNode));
+    tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
         fprintf(stdout, "Out of memory error at line %d\n", lineno);
@@ -144,9 +144,9 @@ TreeNode *newStmtNode(StmtKind kind)
 }
 
 /* Cria um no de expressao para a construcao da arvore sintatica */
-TreeNode *newExpNode(ExpKind kind)
+tree_node *new_expression_node(exp_kind kind)
 {
-    TreeNode *t = (TreeNode *)malloc(sizeof(TreeNode));
+    tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
         fprintf(stdout, "Out of memory error at line %d\n", lineno);
@@ -163,47 +163,31 @@ TreeNode *newExpNode(ExpKind kind)
     return t;
 }
 
-/* Aloca espaço e faz copia de uma string existente */
-char *copyString(char *s)
-{
-    int n;
-    char *t;
-    if (s == NULL)
-        return NULL;
-    n = strlen(s) + 1;
-    t = malloc(n);
-    if (t == NULL)
-        fprintf(stdout, "Out of memory error at line %d\n", lineno);
-    else
-        strcpy(t, s);
-    return t;
-}
-
-/* A variavel indentno eh usada por printTree para armazenar a quantidade de espacos a indentar */
+/* A variavel indentno eh usada por print_tree para armazenar a quantidade de espacos a indentar */
 static int indentno = 0;
 
 /* Macros para incrementar e decrementrar a indentacao */
 #define INDENT indentno += 2
 #define UNINDENT indentno -= 2
 
-/* printSpaces faz a indentacao imprimindo espacos */
-static void printSpaces(void)
+/* print_spaces faz a indentacao imprimindo espacos */
+static void print_spaces(void)
 {
     int i;
     for (i = 0; i < indentno; i++)
         fprintf(stdout, " ");
 }
 
-/* A funcao printTree imprime e arvore sintatica para o arquivo
+/* A funcao print_tree imprime e arvore sintatica para o arquivo
  * stdout usando indentacao para indicar as sub-arvores
  */
-void printTree(TreeNode *tree)
+void print_tree(tree_node *tree)
 {
     int i;
     INDENT;
     while (tree != NULL)
     {
-        printSpaces();
+        print_spaces();
         if (tree->nodekind == StmtK)
         {
             switch (tree->kind.stmt)
@@ -240,7 +224,7 @@ void printTree(TreeNode *tree)
             {
             case OpK:
                 fprintf(stdout, "Op: ");
-                printToken(tree->attr.op, "\0");
+                print_token(tree->attr.op, "\0");
                 break;
             case ConstK:
                 fprintf(stdout, "Const: %d\n", tree->attr.val);
@@ -256,7 +240,7 @@ void printTree(TreeNode *tree)
         else
             fprintf(stdout, "Unknown node kind\n");
         for (i = 0; i < MAXCHILDREN; i++)
-            printTree(tree->child[i]);
+            print_tree(tree->child[i]);
         tree = tree->sibling;
     }
     UNINDENT;
