@@ -13,7 +13,7 @@ static tree_node * savedTree;
 
 /* Definicao da variavel global para o lexema do token */
 char *token_string;
-int lineno;
+int line_number;
 int Error;
 
 /* Prototipos */
@@ -98,13 +98,13 @@ block_stmt  : T_ABRE_CHAVES stmt_seq T_FECHA_CHAVES
 
 if_stmt     : T_SE exp T_ENTAO command %prec "then"
                  { 
-                   $$ = new_statement_node(IfK);
+                   $$ = new_statement_node(IF_STATEMENT);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                  }
             | T_SE exp T_ENTAO command T_SENAO command
                  { 
-                   $$ = new_statement_node(IfK);
+                   $$ = new_statement_node(IF_STATEMENT);
                    $$->child[0] = $2;
                    $$->child[1] = $4;
                    $$->child[2] = $6;
@@ -112,7 +112,7 @@ if_stmt     : T_SE exp T_ENTAO command %prec "then"
             ;
 
 repeat_stmt : T_REPITA command T_ATE exp
-                 { $$ = new_statement_node(RepeatK);
+                 { $$ = new_statement_node(REPEAT_STATEMENT);
                    $$->child[0] = $2; /* command */
                    $$->child[1] = $4; /* exp */
                  }
@@ -120,7 +120,7 @@ repeat_stmt : T_REPITA command T_ATE exp
 
 while_stmt  : T_ENQUANTO T_ABRE_PARENTESES exp T_FECHA_PARENTESES command
                  { 
-                   $$ = new_statement_node(WhileK);
+                   $$ = new_statement_node(WHILE_STATEMENT);
                    $$->child[0] = $3; 
                    $$->child[1] = $5; 
                  }
@@ -130,117 +130,117 @@ command     : stmt { $$ = $1; }
 	    ;
 
 assign_stmt : T_ID { savedName = strdup(token_string);
-                     savedLineNo = lineno;
+                     savedLineNo = line_number;
                    }
               T_ATRIBUICAO exp T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = new_statement_node(AssignK);
+                 { $$ = new_statement_node(ASSIGNMENT_STATEMENT);
                    if ($$)
                    {
                        $$->child[0] = $4;
-                       $$->attr.name = savedName;
-                       $$->lineno = savedLineNo;
+                       $$->attribute.name = savedName;
+                       $$->line_number = savedLineNo;
                    }
                  }
             ;
 
 read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = strdup(token_string);
-                                                                savedLineNo = lineno;
+                                                                savedLineNo = line_number;
                                                               }
                                                               T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = new_statement_node(ReadK);
-                   if ($$) $$->attr.name = savedName;
+                 { $$ = new_statement_node(READ_STATEMENT);
+                   if ($$) $$->attribute.name = savedName;
                  }
             ;
 
 write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
-                 { $$ = new_statement_node(WriteK);
+                 { $$ = new_statement_node(WRITE_STATEMENT);
                    if ($$) $$->child[0] = $3;
                  }
             ;
 
 exp         : exp T_OU log_and_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_OU;
+                   $$->attribute.op = T_OU;
                  }
             | log_and_exp { $$ = $1; }
             ;
 
 log_and_exp : log_and_exp T_E rel_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_E;
+                   $$->attribute.op = T_E;
                  }
             | rel_exp { $$ = $1; }
             ;
 
 rel_exp     : arith_exp T_MENOR arith_exp 
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_MENOR;
+                   $$->attribute.op = T_MENOR;
                  }
             | arith_exp T_MENOR_IGUAL arith_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_MENOR_IGUAL;
+                   $$->attribute.op = T_MENOR_IGUAL;
                  }
             | arith_exp T_MAIOR arith_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_MAIOR;
+                   $$->attribute.op = T_MAIOR;
                  }
             | arith_exp T_MAIOR_IGUAL arith_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_MAIOR_IGUAL;
+                   $$->attribute.op = T_MAIOR_IGUAL;
                  }
             | arith_exp T_IGUAL arith_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_IGUAL;
+                   $$->attribute.op = T_IGUAL;
                  }
             | arith_exp T_DIFERENTE arith_exp
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_DIFERENTE;
+                   $$->attribute.op = T_DIFERENTE;
                  }
             | arith_exp { $$ = $1; }
             ;
 
 arith_exp   : arith_exp T_SOMA term 
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_SOMA;
+                   $$->attribute.op = T_SOMA;
                  }
             | arith_exp T_SUB term
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_SUB;
+                   $$->attribute.op = T_SUB;
                  } 
             | term { $$ = $1; }
             ;
 
 term        : term T_MULT factor 
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_MULT;
+                   $$->attribute.op = T_MULT;
                  }
             | term T_DIV factor
-                 { $$ = new_expression_node(OpK);
+                 { $$ = new_expression_node(OPERATION_EXPRESSION);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
-                   $$->attr.op = T_DIV;
+                   $$->attribute.op = T_DIV;
                  }
             | factor { $$ = $1; }
             ;
@@ -248,18 +248,18 @@ term        : term T_MULT factor
 factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
                  { $$ = $2; }
             | T_NUMERO_INT
-                 { $$ = new_expression_node(ConstK);
-                   $$->attr.val = atoi(token_string);
-                   $$->type = Integer;
+                 { $$ = new_expression_node(CONSTANT_EXPRESSION);
+                   $$->attribute.int_value = atoi(token_string);
+                   $$->type = INTEGER;
                  }
             | T_NUMERO_REAL
-                 { $$ = new_expression_node(ConstK);
-                   $$->attr.real_val = atof(token_string);
-                   $$->type = Real;
+                 { $$ = new_expression_node(CONSTANT_EXPRESSION);
+                   $$->attribute.real_value = atof(token_string);
+                   $$->type = REAL;
                  }
             | T_ID 
-                 { $$ = new_expression_node(IdK);
-                   $$->attr.name = strdup(token_string);
+                 { $$ = new_expression_node(IDENTIFIER_EXPRESSION);
+                   $$->attribute.name = strdup(token_string);
                  }
             | T_ERRO { $$ = NULL; }
             ;
@@ -268,7 +268,7 @@ factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
 
 int yyerror(char * message)
 { 
-  fprintf(stderr,"Syntax error at line %d: %s\n",lineno,message);
+  fprintf(stderr,"Syntax error at line %d: %s\n",line_number,message);
   fprintf(stderr,"Current token: %s\n", token_string);
   Error = TRUE;
   return 0;
@@ -276,7 +276,7 @@ int yyerror(char * message)
 
 /*
  * Chama get_token() do analisador léxico, copia os dados
- * para as variáveis globais que o analisador sintático espera (lineno, token_string)
+ * para as variáveis globais que o analisador sintático espera (line_number, token_string)
  * e retorna apenas o tipo do token, como o Bison espera.
  */
 static int yylex(void)
@@ -297,7 +297,7 @@ static int yylex(void)
   lexeme_to_free = current_token.lexeme;
   
   /* Copia as informacoes do token para as variaveis globais do parser */
-  lineno = current_token.line;
+  line_number = current_token.line;
   token_string = current_token.lexeme;
 
   /* Retorna o tipo do token para o parser */

@@ -24,7 +24,7 @@
 extern FILE *source;
 extern FILE *listing;
 
-extern int lineno;
+extern int line_number;
 extern int Error;
 
 /*************************************************/
@@ -33,32 +33,31 @@ extern int Error;
 
 typedef enum node_kind
 {
-    StmtK,
-    ExpK
+    STATEMENT_KIND,
+    EXPRESSION_KIND
 } node_kind;
-typedef enum stmt_kind
+typedef enum statement_kind
 {
-    IfK,
-    RepeatK,
-    WhileK,
-    AssignK,
-    ReadK,
-    WriteK,
-    DeclK,
-} stmt_kind;
-typedef enum exp_kind
+    IF_STATEMENT,
+    REPEAT_STATEMENT,
+    WHILE_STATEMENT,
+    ASSIGNMENT_STATEMENT,
+    READ_STATEMENT,
+    WRITE_STATEMENT,
+    DECLARATION_STATEMENT,
+} statement_kind;
+typedef enum expression_kind
 {
-    OpK,
-    ConstK,
-    IdK
-} exp_kind;
+    OPERATION_EXPRESSION,
+    CONSTANT_EXPRESSION,
+    IDENTIFIER_EXPRESSION
+} expression_kind;
 
 typedef enum exp_type
 {
-    Void,
-    Integer,
-    Real,
-    Boolean
+    VOID,
+    INTEGER,
+    REAL
 } exp_type;
 
 #define MAXCHILDREN 3
@@ -67,20 +66,20 @@ typedef struct tree_node
 {
     struct tree_node *child[MAXCHILDREN];
     struct tree_node *sibling;
-    int lineno;
-    node_kind nodekind;
+    int line_number;
+    node_kind node_kind;
     union kind
     {
-        stmt_kind stmt;
-        exp_kind exp;
+        statement_kind stmt;
+        expression_kind exp;
     } kind;
-    union attr
+    union attribute
     {
         token_type op;
-        int val;
-        double real_val;
+        int int_value;
+        double real_value;
         char *name;
-    } attr;
+    } attribute;
     exp_type type;
 } tree_node;
 
@@ -99,10 +98,10 @@ extern char *tokenString;
 void print_token(token_type token_type, const char *lexeme);
 
 /* Cria um no de declaracao para construcao da arvore sintatica */
-tree_node *new_statement_node(stmt_kind kind);
+tree_node *new_statement_node(statement_kind kind);
 
 /* Cria um no de expressao para construcao da arvore sintatica */
-tree_node *new_expression_node(exp_kind);
+tree_node *new_expression_node(expression_kind);
 
 /* Imprime a arvore sintatica usando indentacao para indicar as subarvores  */
 void print_tree(tree_node *, const int);

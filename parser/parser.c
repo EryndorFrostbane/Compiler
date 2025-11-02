@@ -125,40 +125,40 @@ void print_token(token_type token, const char *tokenString)
 }
 
 /* Cria um no de declaracao para a construcao da arvore sintatica */
-tree_node *new_statement_node(stmt_kind kind)
+tree_node *new_statement_node(statement_kind kind)
 {
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
-        printf("Out of memory error at line %d\n", lineno);
+        printf("Out of memory error at line %d\n", line_number);
     else
     {
         for (i = 0; i < MAXCHILDREN; i++)
             t->child[i] = NULL;
         t->sibling = NULL;
-        t->nodekind = StmtK;
+        t->node_kind = STATEMENT_KIND;
         t->kind.stmt = kind;
-        t->lineno = lineno;
+        t->line_number = line_number;
     }
     return t;
 }
 
 /* Cria um no de expressao para a construcao da arvore sintatica */
-tree_node *new_expression_node(exp_kind kind)
+tree_node *new_expression_node(expression_kind kind)
 {
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
-        printf("Out of memory error at line %d\n", lineno);
+        printf("Out of memory error at line %d\n", line_number);
     else
     {
         for (i = 0; i < MAXCHILDREN; i++)
             t->child[i] = NULL;
         t->sibling = NULL;
-        t->nodekind = ExpK;
+        t->node_kind = EXPRESSION_KIND;
         t->kind.exp = kind;
-        t->lineno = lineno;
-        t->type = Void;
+        t->line_number = line_number;
+        t->type = VOID;
     }
     return t;
 }
@@ -179,60 +179,60 @@ void print_tree(tree_node *tree, const int indentation_level)
     {
         print_spaces(indentation_level);
 
-        if (tree->nodekind == StmtK)
+        if (tree->node_kind == STATEMENT_KIND)
         {
             switch (tree->kind.stmt)
             {
-            case IfK:
+            case IF_STATEMENT:
                 printf("If\n");
                 break;
-            case RepeatK:
+            case REPEAT_STATEMENT:
                 printf("Repeat\n");
                 break;
-            case WhileK:
+            case WHILE_STATEMENT:
                 printf("While\n");
                 break;
-            case AssignK:
-                printf("Assign to: %s\n", tree->attr.name);
+            case ASSIGNMENT_STATEMENT:
+                printf("Assign to: %s\n", tree->attribute.name);
                 break;
-            case ReadK:
-                printf("Read: %s\n", tree->attr.name);
+            case READ_STATEMENT:
+                printf("Read: %s\n", tree->attribute.name);
                 break;
-            case WriteK:
+            case WRITE_STATEMENT:
                 printf("Write\n");
                 break;
-            case DeclK:
-                printf("Decl: %s\n", tree->attr.name);
+            case DECLARATION_STATEMENT:
+                printf("Decl: %s\n", tree->attribute.name);
                 break;
             default:
                 printf("Unknown statement node\n");
                 break;
             }
         }
-        else if (tree->nodekind == ExpK)
+        else if (tree->node_kind == EXPRESSION_KIND)
         {
             switch (tree->kind.exp)
             {
-            case OpK:
+            case OPERATION_EXPRESSION:
                 printf("Op: ");
-                print_token(tree->attr.op, "\0");
+                print_token(tree->attribute.op, "\0");
                 break;
-            case ConstK:
+            case CONSTANT_EXPRESSION:
                 switch (tree->type)
                 {
-                    case Integer:
-                        printf("Const: %d\n", tree->attr.val);
+                    case INTEGER:
+                        printf("Const: %d\n", tree->attribute.int_value);
                         break;
-                    case Real:
-                        printf("Const: %f\n", tree->attr.real_val);
+                    case REAL:
+                        printf("Const: %f\n", tree->attribute.real_value);
                         break;
                     default:
-                        printf("Const (Unknown Type): %d\n", tree->attr.val);
+                        printf("Const (Unknown Type): %d\n", tree->attribute.int_value);
                         break;
                     }
                 break;
-            case IdK:
-                printf("Id: %s\n", tree->attr.name);
+            case IDENTIFIER_EXPRESSION:
+                printf("Id: %s\n", tree->attribute.name);
                 break;
             default:
                 printf("Unknown expression node\n");
