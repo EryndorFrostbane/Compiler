@@ -11,21 +11,13 @@
 #define ENDFILE 0
 #endif
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
 #define MAXRESERVED 8
 
 extern FILE *source;
 extern FILE *listing;
 
 extern int line_number;
-extern int Error;
+extern int is_error;
 
 /*************************************************/
 /******* Arvore sintatica para o parser  ********/

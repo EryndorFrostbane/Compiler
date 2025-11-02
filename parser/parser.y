@@ -14,7 +14,7 @@ static tree_node * savedTree;
 /* Definicao da variavel global para o lexema do token */
 char *token_string;
 int line_number;
-int Error;
+int is_error;
 
 /* Prototipos */
 static int yylex(void);
@@ -268,9 +268,9 @@ factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
 
 int yyerror(char * message)
 { 
-  fprintf(stderr,"Syntax error at line %d: %s\n",line_number,message);
+  fprintf(stderr,"Syntax error at line %d: %s\n", line_number, message);
   fprintf(stderr,"Current token: %s\n", token_string);
-  Error = TRUE;
+  is_error = 1;
   return 0;
 }
 
