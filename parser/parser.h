@@ -1,4 +1,3 @@
-
 #ifndef _PARSE_H_
 #define _PARSE_H_
 
@@ -105,7 +104,7 @@ tree_node *new_statement_node(stmt_kind kind);
 tree_node *new_expression_node(exp_kind);
 
 /* Imprime a arvore sintatica usando indentacao para indicar as subarvores  */
-void print_tree(tree_node *);
+void print_tree(tree_node *, const int);
 
 /* A funcao parse retorna a arvore sintatica construida */
 tree_node * parse(void);

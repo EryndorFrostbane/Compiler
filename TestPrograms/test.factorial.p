@@ -5,16 +5,16 @@
 
 inteiro numero;
 inteiro fatorial;
-inteiro i;
+inteiro acumulador;
 
 ler(numero);
 
 fatorial = 1;
-i = 1;
+acumulador = 1;
 
-enquanto (i <= numero) {
-  fatorial = fatorial * i;
-  i = i + 1;
+enquanto (acumulador <= numero) {
+  fatorial = fatorial * acumulador;
+  acumulador = acumulador + 1;
 }
 
 mostrar(fatorial);

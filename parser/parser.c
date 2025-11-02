@@ -21,21 +21,21 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    fprintf(stdout, "Compilando o arquivo: %s\n", argv[1]);
-    fprintf(stdout, "-------------------------------------\n");
+    printf("Compilando o arquivo: %s\n", argv[1]);
+    printf("-------------------------------------\n");
 
     yydebug = 0; // 0 desativa o debug trace, 1 ativa o debug trace
     syntaxTree = parse();
 
     if (syntaxTree != NULL)
     {
-        fprintf(stdout, "\nConstrucao da arvore sintatica finalizada.\n");
-        fprintf(stdout, "-------------------------------------\n");
-        print_tree(syntaxTree);
+        printf("\nConstrucao da arvore sintatica finalizada.\n");
+        printf("-------------------------------------\n");
+        print_tree(syntaxTree, 0);
     }
     else
     {
-        fprintf(stdout, "\nNao foi possivel construir a arvore sintatica devido a erros.\n");
+        printf("\nNao foi possivel construir a arvore sintatica devido a erros.\n");
     }
 
     fclose(yyin);
@@ -56,71 +56,71 @@ void print_token(token_type token, const char *tokenString)
     case T_MOSTRAR:
     case T_INTEIRO:
     case T_REAL:
-        fprintf(stdout, "reserved word: %s\n", tokenString);
+        printf("reserved word: %s\n", tokenString);
         break;
     case T_ATRIBUICAO:
-        fprintf(stdout, "=\n");
+        printf("=\n");
         break;
     case T_MENOR:
-        fprintf(stdout, "<\n");
+        printf("<\n");
         break;
     case T_MAIOR:
-        fprintf(stdout, ">\n");
+        printf(">\n");
         break;
     case T_IGUAL:
-        fprintf(stdout, "==\n");
+        printf("==\n");
         break;
     case T_MENOR_IGUAL:
-        fprintf(stdout, "<=\n");
+        printf("<=\n");
         break;
     case T_MAIOR_IGUAL:
-        fprintf(stdout, ">=\n");
+        printf(">=\n");
         break;
     case T_E:
-        fprintf(stdout, "&&\n");
+        printf("&&\n");
         break;
     case T_DIFERENTE:
-        fprintf(stdout, "!=\n");
+        printf("!=\n");
         break;
     case T_OU:
-        fprintf(stdout, "||\n");
+        printf("||\n");
         break;
     case T_ABRE_PARENTESES:
-        fprintf(stdout, "(\n");
+        printf("(\n");
         break;
     case T_FECHA_PARENTESES:
-        fprintf(stdout, ")\n");
+        printf(")\n");
         break;
     case T_PONTO_VIRGULA:
-        fprintf(stdout, ";\n");
+        printf(";\n");
         break;
     case T_SOMA:
-        fprintf(stdout, "+\n");
+        printf("+\n");
         break;
     case T_SUB:
-        fprintf(stdout, "-\n");
+        printf("-\n");
         break;
     case T_MULT:
-        fprintf(stdout, "*\n");
+        printf("*\n");
         break;
     case T_DIV:
-        fprintf(stdout, "/\n");
+        printf("/\n");
         break;
     case ENDFILE:
-        fprintf(stdout, "EOF\n");
+        printf("EOF\n");
         break;
     case T_NUMERO_INT:
     case T_NUMERO_REAL:
-        fprintf(stdout, "NUM, val= %s\n", tokenString);
+        printf("NUM, val= %s\n", tokenString);
         break;
     case T_ID:
-        fprintf(stdout, "ID, name= %s\n", tokenString);
+        printf("ID, name= %s\n", tokenString);
         break;
     case T_ERRO:
-        fprintf(stdout, "ERROR: %s\n", tokenString);
+        printf("ERROR: %s\n", tokenString);
         break;
     default: /* nao deve acontecer nunca */
-        fprintf(stdout, "Unknown token: %d\n", token);
+        printf("Unknown token: %d\n", token);
     }
 }
 
@@ -130,7 +130,7 @@ tree_node *new_statement_node(stmt_kind kind)
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
-        fprintf(stdout, "Out of memory error at line %d\n", lineno);
+        printf("Out of memory error at line %d\n", lineno);
     else
     {
         for (i = 0; i < MAXCHILDREN; i++)
@@ -149,7 +149,7 @@ tree_node *new_expression_node(exp_kind kind)
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
     int i;
     if (t == NULL)
-        fprintf(stdout, "Out of memory error at line %d\n", lineno);
+        printf("Out of memory error at line %d\n", lineno);
     else
     {
         for (i = 0; i < MAXCHILDREN; i++)
@@ -163,58 +163,49 @@ tree_node *new_expression_node(exp_kind kind)
     return t;
 }
 
-/* A variavel indentno eh usada por print_tree para armazenar a quantidade de espacos a indentar */
-static int indentno = 0;
-
-/* Macros para incrementar e decrementrar a indentacao */
-#define INDENT indentno += 2
-#define UNINDENT indentno -= 2
-
 /* print_spaces faz a indentacao imprimindo espacos */
-static void print_spaces(void)
+static void print_spaces(const int indentation_level)
 {
-    int i;
-    for (i = 0; i < indentno; i++)
-        fprintf(stdout, " ");
+    for (int amount = 0; amount < indentation_level; amount++)
+        printf(" ");
 }
 
 /* A funcao print_tree imprime e arvore sintatica para o arquivo
  * stdout usando indentacao para indicar as sub-arvores
  */
-void print_tree(tree_node *tree)
+void print_tree(tree_node *tree, const int indentation_level)
 {
-    int i;
-    INDENT;
     while (tree != NULL)
     {
-        print_spaces();
+        print_spaces(indentation_level);
+
         if (tree->nodekind == StmtK)
         {
             switch (tree->kind.stmt)
             {
             case IfK:
-                fprintf(stdout, "If\n");
+                printf("If\n");
                 break;
             case RepeatK:
-                fprintf(stdout, "Repeat\n");
+                printf("Repeat\n");
                 break;
             case WhileK:
-                fprintf(stdout, "While\n");
+                printf("While\n");
                 break;
             case AssignK:
-                fprintf(stdout, "Assign to: %s\n", tree->attr.name);
+                printf("Assign to: %s\n", tree->attr.name);
                 break;
             case ReadK:
-                fprintf(stdout, "Read: %s\n", tree->attr.name);
+                printf("Read: %s\n", tree->attr.name);
                 break;
             case WriteK:
-                fprintf(stdout, "Write\n");
+                printf("Write\n");
                 break;
             case DeclK:
-                fprintf(stdout, "Decl: %s\n", tree->attr.name);
+                printf("Decl: %s\n", tree->attr.name);
                 break;
             default:
-                fprintf(stdout, "Unknown ExpNode kind\n");
+                printf("Unknown statement node\n");
                 break;
             }
         }
@@ -223,25 +214,28 @@ void print_tree(tree_node *tree)
             switch (tree->kind.exp)
             {
             case OpK:
-                fprintf(stdout, "Op: ");
+                printf("Op: ");
                 print_token(tree->attr.op, "\0");
                 break;
             case ConstK:
-                fprintf(stdout, "Const: %d\n", tree->attr.val);
+                printf("Const: %d\n", tree->attr.val);
                 break;
             case IdK:
-                fprintf(stdout, "Id: %s\n", tree->attr.name);
+                printf("Id: %s\n", tree->attr.name);
                 break;
             default:
-                fprintf(stdout, "Unknown ExpNode kind\n");
+                printf("Unknown expression node\n");
                 break;
             }
         }
         else
-            fprintf(stdout, "Unknown node kind\n");
-        for (i = 0; i < MAXCHILDREN; i++)
-            print_tree(tree->child[i]);
+        {
+            printf("Unknown node\n");
+        }
+
+        for (int amount = 0; amount < MAXCHILDREN; amount++)
+            print_tree(tree->child[amount], indentation_level + 2);
+
         tree = tree->sibling;
     }
-    UNINDENT;
 }
