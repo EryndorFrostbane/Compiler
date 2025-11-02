@@ -57,6 +57,7 @@ typedef enum exp_type
 {
     Void,
     Integer,
+    Real,
     Boolean
 } exp_type;
 
@@ -68,12 +69,12 @@ typedef struct tree_node
     struct tree_node *sibling;
     int lineno;
     node_kind nodekind;
-    union
+    union kind
     {
         stmt_kind stmt;
         exp_kind exp;
     } kind;
-    union
+    union attr
     {
         token_type op;
         int val;

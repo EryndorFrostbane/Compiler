@@ -250,10 +250,12 @@ factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
             | T_NUMERO_INT
                  { $$ = new_expression_node(ConstK);
                    $$->attr.val = atoi(token_string);
+                   $$->type = Integer;
                  }
             | T_NUMERO_REAL
                  { $$ = new_expression_node(ConstK);
                    $$->attr.real_val = atof(token_string);
+                   $$->type = Real;
                  }
             | T_ID 
                  { $$ = new_expression_node(IdK);

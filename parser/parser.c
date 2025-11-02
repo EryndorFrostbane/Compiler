@@ -218,7 +218,18 @@ void print_tree(tree_node *tree, const int indentation_level)
                 print_token(tree->attr.op, "\0");
                 break;
             case ConstK:
-                printf("Const: %d\n", tree->attr.val);
+                switch (tree->type)
+                {
+                    case Integer:
+                        printf("Const: %d\n", tree->attr.val);
+                        break;
+                    case Real:
+                        printf("Const: %f\n", tree->attr.real_val);
+                        break;
+                    default:
+                        printf("Const (Unknown Type): %d\n", tree->attr.val);
+                        break;
+                    }
                 break;
             case IdK:
                 printf("Id: %s\n", tree->attr.name);
