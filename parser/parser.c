@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "../scanner/scanner.h"
-#include "globals.h"
 #include "parser.h"
 
 extern int yydebug;

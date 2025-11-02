@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "parser.h"
 #include "../scanner/scanner.h"
 
 /* Imprime um token e seu lexema no arquivo stdout */
