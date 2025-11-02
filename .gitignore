@@ -55,8 +55,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Flex
+# App
 lex.yy.c
 parser.tab.c
-scanner
-parser
+main
+
+# VSCode
+.vscode/
