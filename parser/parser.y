@@ -12,7 +12,7 @@ static int savedLineNo;
 static tree_node * savedTree;
 
 /* Definicao da variavel global para o lexema do token */
-char * tokenString;
+char *token_string;
 int lineno;
 int Error;
 
@@ -23,9 +23,6 @@ static int yyerror(char *);
 %}
 
 %code requires {
-  #include "scanner/scanner.h" // Inclui os tokens usados no analisador léxico
-  #include "parser/parser.h" // Inclui funções para construção da árvore sintática
-
   /* Redefine YYTOKENTYPE para usar token_type. Isso suprime a geracao do enum padrao do Bison. */
   #define YYTOKENTYPE token_type
 }
@@ -48,10 +45,10 @@ static int yyerror(char *);
 
 %% /* --- Gramatica (sem alteracoes) --- */
 
-program     : decl_list optional_stmt_seq
-                 {
-                   savedTree = $2;
-                 }
+program     : T_ABRE_CHAVES decl_list optional_stmt_seq T_FECHA_CHAVES
+                {
+                  savedTree = $3;
+                }
             ;
 
 optional_stmt_seq : stmt_seq { $$ = $1; }
@@ -132,7 +129,7 @@ while_stmt  : T_ENQUANTO T_ABRE_PARENTESES exp T_FECHA_PARENTESES command
 command     : stmt { $$ = $1; }
 	    ;
 
-assign_stmt : T_ID { savedName = strdup(tokenString);
+assign_stmt : T_ID { savedName = strdup(token_string);
                      savedLineNo = lineno;
                    }
               T_ATRIBUICAO exp T_PONTO_VIRGULA /* << ADD SEMICOLON */
@@ -146,7 +143,7 @@ assign_stmt : T_ID { savedName = strdup(tokenString);
                  }
             ;
 
-read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = strdup(tokenString);
+read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = strdup(token_string);
                                                                 savedLineNo = lineno;
                                                               }
                                                               T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
@@ -252,15 +249,15 @@ factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
                  { $$ = $2; }
             | T_NUMERO_INT
                  { $$ = new_expression_node(ConstK);
-                   $$->attr.val = atoi(tokenString);
+                   $$->attr.val = atoi(token_string);
                  }
             | T_NUMERO_REAL
                  { $$ = new_expression_node(ConstK);
-                   $$->attr.real_val = atof(tokenString);
+                   $$->attr.real_val = atof(token_string);
                  }
             | T_ID 
                  { $$ = new_expression_node(IdK);
-                   $$->attr.name = strdup(tokenString);
+                   $$->attr.name = strdup(token_string);
                  }
             | T_ERRO { $$ = NULL; }
             ;
@@ -270,14 +267,14 @@ factor      : T_ABRE_PARENTESES exp T_FECHA_PARENTESES
 int yyerror(char * message)
 { 
   fprintf(stderr,"Syntax error at line %d: %s\n",lineno,message);
-  fprintf(stderr,"Current token: %s\n", tokenString);
+  fprintf(stderr,"Current token: %s\n", token_string);
   Error = TRUE;
   return 0;
 }
 
 /*
  * Chama get_token() do analisador léxico, copia os dados
- * para as variáveis globais que o analisador sintático espera (lineno, tokenString)
+ * para as variáveis globais que o analisador sintático espera (lineno, token_string)
  * e retorna apenas o tipo do token, como o Bison espera.
  */
 static int yylex(void)
@@ -299,7 +296,7 @@ static int yylex(void)
   
   /* Copia as informacoes do token para as variaveis globais do parser */
   lineno = current_token.line;
-  tokenString = current_token.lexeme;
+  token_string = current_token.lexeme;
 
   /* Retorna o tipo do token para o parser */
   return (int)current_token.type;
