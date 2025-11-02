@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "scanner.h"
+#include "../scanner/scanner.h"
 
 #ifndef YYPARSER
 #define ENDFILE 0

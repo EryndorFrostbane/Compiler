@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "headers/scanner.h"
-#include "headers/globals.h"
-#include "headers/parser.h"
+#include "../scanner/scanner.h"
+#include "globals.h"
+#include "parser.h"
 
 extern int yydebug;
 

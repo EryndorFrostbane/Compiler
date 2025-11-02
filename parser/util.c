@@ -1,6 +1,5 @@
-
-#include "headers/globals.h"
-#include "headers/scanner.h"
+#include "globals.h"
+#include "../scanner/scanner.h"
 
 /* Imprime um token e seu lexema no arquivo stdout */
 void printToken(token_type token, const char* tokenString) {

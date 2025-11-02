@@ -1,8 +1,8 @@
 %{
 #define YYPARSER /* Distingue a saida do Yacc de outros arquivos de codigo */
 
-#include "headers/globals.h"
-#include "headers/parser.h"
+#include "parser/globals.h"
+#include "parser/parser.h"
 
 #define YYSTYPE TreeNode *
 #define YYDEBUG 1
@@ -24,8 +24,8 @@ static int yyerror(char *);
 %}
 
 %code requires {
-  #include "headers/scanner.h" // Inclui os tokens usados no analisador léxico
-  #include "headers/globals.h" // Inclui funções para construção da árvore sintática
+  #include "scanner/scanner.h" // Inclui os tokens usados no analisador léxico
+  #include "parser/globals.h" // Inclui funções para construção da árvore sintática
 
   /* Redefine YYTOKENTYPE para usar token_type. Isso suprime a geracao do enum padrao do Bison. */
   #define YYTOKENTYPE token_type
