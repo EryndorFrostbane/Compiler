@@ -7,27 +7,20 @@
 #include <string.h>
 #include "../scanner/scanner.h"
 
-#ifndef YYPARSER
-#define ENDFILE 0
-#endif
-
-#define MAXRESERVED 8
-
-extern FILE *source;
-extern FILE *listing;
-
+/// @brief Variável global para armazenar a linha atual.
 extern int line_number;
+
+/// @brief Variável global para definir se ocorreu um erro.
 extern int is_error;
 
-/*************************************************/
-/******* Arvore sintatica para o parser  ********/
-/*************************************************/
-
+/// @brief Os possíveis tipos de nó da árvore sintática.
 typedef enum node_kind
 {
     STATEMENT_KIND,
     EXPRESSION_KIND
 } node_kind;
+
+/// @brief Os possíveis tipos de declarações.
 typedef enum statement_kind
 {
     IF_STATEMENT,
@@ -38,6 +31,8 @@ typedef enum statement_kind
     WRITE_STATEMENT,
     DECLARATION_STATEMENT,
 } statement_kind;
+
+/// @brief Os possíveis tipos de expressão.
 typedef enum expression_kind
 {
     OPERATION_EXPRESSION,
@@ -45,6 +40,7 @@ typedef enum expression_kind
     IDENTIFIER_EXPRESSION
 } expression_kind;
 
+/// @brief Os possíveis tipos de variáveis.
 typedef enum exp_type
 {
     VOID,
@@ -54,6 +50,7 @@ typedef enum exp_type
 
 #define MAXCHILDREN 3
 
+/// @brief Um nó da árvore sintática.
 typedef struct tree_node
 {
     struct tree_node *child[MAXCHILDREN];
@@ -75,30 +72,31 @@ typedef struct tree_node
     exp_type type;
 } tree_node;
 
-/*****************************************************/
-/*********** Flags para rastreamento    ************/
-/*****************************************************/
+/// @brief Variável global para armazenar o lexema do token.
+extern char *token_string;
 
-extern int EchoSource;
-extern int TraceScan;
-extern int TraceParse;
-
-/* Variavel global para armazenar o lexema do token */
-extern char *tokenString;
-
-/* Imprime o token e seu lexema */
+/// @brief Imprime um token e seu lexema.
+/// @param token_type O tipo do token.
+/// @param lexeme O lexema.
 void print_token(token_type token_type, const char *lexeme);
 
-/* Cria um no de declaracao para construcao da arvore sintatica */
+/// @brief Cria um nó de declaração para construção da árvore sintática.
+/// @param kind O tipo da declaração.
+/// @return Um nó da árvore sintática.
 tree_node *new_statement_node(statement_kind kind);
 
-/* Cria um no de expressao para construcao da arvore sintatica */
-tree_node *new_expression_node(expression_kind);
+/// @brief Cria um nó de expressão para construção da árvore sintática.
+/// @param kind O tipo da expressão.
+/// @return Um nó da árvore sintática.
+tree_node *new_expression_node(expression_kind kind);
 
-/* Imprime a arvore sintatica usando indentacao para indicar as subarvores  */
-void print_tree(tree_node *, const int);
+/// @brief Imprime a árvore sintática
+/// @param tree Um nó da árvore sintática.
+/// @param intentation_level O nível de indentação do nó atual.
+void print_tree(tree_node *tree, const int indentation_level);
 
-/* A funcao parse retorna a arvore sintatica construida */
+/// @brief Processa um programa P- e retorna sua árvore sintática.
+/// @return O nó raíz da árvore sintática.
 tree_node * parse(void);
 
 #endif

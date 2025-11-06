@@ -2,11 +2,22 @@
 #include "../scanner/scanner.h"
 #include "parser.h"
 
+/// @brief Imprime espaços de acordo com a quantidade especificada.
+/// @param argc Quantos espaços devem ser impressos.
+static void print_spaces(const int amount);
+
+/// @brief Variável de depuração do Bison. 0 desativa o debug trace, 1 ativa o debug trace
 extern int yydebug;
 
+/// @brief O ponto de entrada do programa.
+/// @param argc Número de argumentos passados pela linha de comando.
+/// @param argv Array de strings contendo os argumentos da linha de comando.
+///             O primeiro elemento (argv[0]) normalmente é o nome do programa.
+/// @return O código de saída do programa: 0 em caso de sucesso, diferente de 0 em caso de erro.
 int main(int argc, char **argv)
 {
-    tree_node *syntaxTree;
+    yydebug = 0;
+    tree_node *syntaxTree = NULL;
 
     if (argc < 2)
     {
@@ -24,7 +35,6 @@ int main(int argc, char **argv)
     printf("Compilando o arquivo: %s\n", argv[1]);
     printf("-------------------------------------\n");
 
-    yydebug = 0; // 0 desativa o debug trace, 1 ativa o debug trace
     syntaxTree = parse();
 
     if (syntaxTree != NULL)
@@ -42,8 +52,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-/* Imprime um token e seu lexema no arquivo stdout */
-void print_token(token_type token, const char *tokenString)
+void print_token(token_type token, const char *token_string)
 {
     switch (token)
     {
@@ -56,7 +65,7 @@ void print_token(token_type token, const char *tokenString)
     case T_MOSTRAR:
     case T_INTEIRO:
     case T_REAL:
-        printf("reserved word: %s\n", tokenString);
+        printf("reserved word: %s\n", token_string);
         break;
     case T_ATRIBUICAO:
         printf("=\n");
@@ -106,25 +115,24 @@ void print_token(token_type token, const char *tokenString)
     case T_DIV:
         printf("/\n");
         break;
-    case ENDFILE:
+    case T_EOF:
         printf("EOF\n");
         break;
     case T_NUMERO_INT:
     case T_NUMERO_REAL:
-        printf("NUM, val= %s\n", tokenString);
+        printf("NUM, val= %s\n", token_string);
         break;
     case T_ID:
-        printf("ID, name= %s\n", tokenString);
+        printf("ID, name= %s\n", token_string);
         break;
     case T_ERRO:
-        printf("ERROR: %s\n", tokenString);
+        printf("ERROR: %s\n", token_string);
         break;
     default: /* nao deve acontecer nunca */
         printf("Unknown token: %d\n", token);
     }
 }
 
-/* Cria um no de declaracao para a construcao da arvore sintatica */
 tree_node *new_statement_node(statement_kind kind)
 {
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
@@ -143,7 +151,6 @@ tree_node *new_statement_node(statement_kind kind)
     return t;
 }
 
-/* Cria um no de expressao para a construcao da arvore sintatica */
 tree_node *new_expression_node(expression_kind kind)
 {
     tree_node *t = (tree_node *)malloc(sizeof(tree_node));
@@ -163,16 +170,12 @@ tree_node *new_expression_node(expression_kind kind)
     return t;
 }
 
-/* print_spaces faz a indentacao imprimindo espacos */
-static void print_spaces(const int indentation_level)
+static void print_spaces(const int amount)
 {
-    for (int amount = 0; amount < indentation_level; amount++)
+    for (int amount = 0; amount < amount; amount++)
         printf(" ");
 }
 
-/* A funcao print_tree imprime e arvore sintatica para o arquivo
- * stdout usando indentacao para indicar as sub-arvores
- */
 void print_tree(tree_node *tree, const int indentation_level)
 {
     while (tree != NULL)

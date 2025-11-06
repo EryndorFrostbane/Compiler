@@ -304,7 +304,7 @@ static int yylex(void)
   return (int)current_token.type;
 }
 
-
+// Retorna a árvore sintática.
 tree_node * parse(void)
 { 
   yyparse();
