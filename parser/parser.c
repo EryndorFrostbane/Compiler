@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "../scanner/scanner.h"
 #include "parser.h"
+#include "../semantic/semantics.h" // NOVO: Módulo do analisador semântico
 
 /// @brief Imprime espaços de acordo com a quantidade especificada.
-/// @param argc Quantos espaços devem ser impressos.
+/// @param amount Quantos espaços devem ser impressos.
 static void print_spaces(const int amount);
 
 /// @brief Variável de depuração do Bison. 0 desativa o debug trace, 1 ativa o debug trace
@@ -18,6 +20,7 @@ int main(int argc, char **argv)
 {
     yydebug = 0;
     tree_node *syntaxTree = NULL;
+    tree_node *semanticTree = NULL;
 
     if (argc < 2)
     {
@@ -35,20 +38,61 @@ int main(int argc, char **argv)
     printf("Compilando o arquivo: %s\n", argv[1]);
     printf("-------------------------------------\n");
 
+    printf("--- INICIANDO ANÁLISE SINTÁTICA ---\n");
     syntaxTree = parse();
 
-    if (syntaxTree != NULL)
+
+    printf("\n--- ANÁLISE SINTÁTICA CONCLUÍDA ---\n");
+    
+    // Verifica se a árvore sintática foi gerada
+    if (syntaxTree == NULL)
     {
-        printf("\nConstrucao da arvore sintatica finalizada.\n");
-        printf("-------------------------------------\n");
-        print_tree(syntaxTree, 0);
-    }
-    else
-    {
-        printf("\nNao foi possivel construir a arvore sintatica devido a erros.\n");
+         printf("A análise sintática não gerou a Árvore Sintática Abstrata (AST).\n");
+         return 1;
     }
 
+
+    printf("\n\n=========================================\n");
+    printf("        AST ANTES DA ANÁLISE SEMÂNTICA\n");
+    printf("=========================================\n");
+    print_tree(syntaxTree, 0);
+
+
+    // 3. FASE DE ANÁLISE SEMÂNTICA
+    printf("\n\n=========================================\n");
+    printf("        INICIANDO ANALISE SEMANTICA\n");
+    printf("=========================================\n");
+    
+    // O analisador semântico aplica as fases de Tabela de Símbolos e Verificação/Ajuste de Tipos
+    semanticTree = apply_semantic_analysis(syntaxTree);
+
+    if (is_error)
+    {
+        printf("\n--- ANALISE SEMANTICA CONCLUIDA ---\n");
+        printf("Erros sementicos encontrados. O processo de compilacao foi interrompido.\n");
+        return 1;
+    }
+    
+    printf("\n--- ANALISE SEMANTICA CONCLUIDA ---\n");
+
+
+    // 4. IMPRESSÃO DA TABELA DE SÍMBOLOS
+    printf("\n\n=========================================\n");
+    printf("        TABELA DE SIMBOLOS\n");
+    printf("=========================================\n");
+    print_symbol_table(); // Função implementada em semantics.c
+
+    
+    // 5. IMPRESSÃO da AST DEPOIS do ajuste semântico
+    printf("\n\n=========================================\n");
+    printf("        AST APOS ANALISE SEMANTICA (AJUSTADA)\n");
+    printf("=========================================\n");
+    print_tree(semanticTree, 0);
+
+
+    // Fechamento do arquivo e retorno
     fclose(yyin);
+    printf("\n\nCompilacao concluida com sucesso (Analise Semantica OK).\n");
     return 0;
 }
 
@@ -182,6 +226,8 @@ void print_tree(tree_node *tree, const int indentation_level)
     {
         print_spaces(indentation_level);
 
+        printf("L%d: ", tree->line_number);
+
         if (tree->node_kind == STATEMENT_KIND)
         {
             switch (tree->kind.stmt)
@@ -236,6 +282,9 @@ void print_tree(tree_node *tree, const int indentation_level)
                 break;
             case IDENTIFIER_EXPRESSION:
                 printf("Id: %s\n", tree->attribute.name);
+                break;
+            case INT_TO_REAL_EXP: 
+                printf("Expression: COERCAO (INT -> REAL)\n");
                 break;
             default:
                 printf("Unknown expression node\n");

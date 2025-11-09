@@ -43,7 +43,7 @@ bison parser/parser.y
 3. Os aquivos `lex.yy.c` e `parser.tab.c` serão gerados. Você então deve compilá-los juntos com a aplicação para gerar o analisador:
 
 ```bash
-gcc lex.yy.c parser.tab.c parser/parser.c -o main
+gcc lex.yy.c parser.tab.c parser/parser.c semantic/semantics.c -o main
 ```
 
 4. Agora você pode executar o analisador em arquivos P-

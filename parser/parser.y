@@ -2,6 +2,7 @@
 #define YYPARSER /* Distingue a saida do Yacc de outros arquivos de codigo */
 
 #include "parser/parser.h"
+#include "./semantic/semantics.h"
 
 #define YYSTYPE tree_node *
 #define YYDEBUG 1
@@ -19,6 +20,8 @@ int is_error;
 /* Prototipos */
 static int yylex(void);
 static int yyerror(char *);
+
+static exp_type current_declaration_type;
 
 %}
 
@@ -59,12 +62,18 @@ decl_list   : decl_list decl { $$ = $1; }
             | /* vazio */ { $$ = NULL; } 
             ;
 
-decl        : T_INTEIRO id_list T_PONTO_VIRGULA { $$ = NULL; }
-            | T_REAL id_list T_PONTO_VIRGULA { $$ = NULL; }
+decl        : T_INTEIRO { current_declaration_type = INTEGER; }  id_list T_PONTO_VIRGULA { $$ = NULL; }
+            | T_REAL { current_declaration_type = REAL; } id_list T_PONTO_VIRGULA { $$ = NULL; }
             ;
 
-id_list     : T_ID { $$ = NULL; }
-            | id_list T_VIRGULA T_ID { $$ = NULL; }
+id_list     : T_ID { 
+                st_insert(token_string, current_declaration_type, line_number);
+                $$ = NULL;
+            }
+            | id_list T_VIRGULA T_ID { 
+                st_insert(token_string, current_declaration_type, line_number);
+                $$ = NULL;
+            }
             ;
 
 stmt_seq    : stmt_seq stmt

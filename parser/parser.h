@@ -37,7 +37,8 @@ typedef enum expression_kind
 {
     OPERATION_EXPRESSION,
     CONSTANT_EXPRESSION,
-    IDENTIFIER_EXPRESSION
+    IDENTIFIER_EXPRESSION,
+    INT_TO_REAL_EXP
 } expression_kind;
 
 /// @brief Os possíveis tipos de variáveis.
@@ -72,6 +73,14 @@ typedef struct tree_node
     exp_type type;
 } tree_node;
 
+typedef struct symbol_entry
+{
+    char *name;
+    exp_type type;
+    int memory_address; // Endereço de memória em bytes
+    struct symbol_entry *next;
+} symbol_entry;
+
 /// @brief Variável global para armazenar o lexema do token.
 extern char *token_string;
 
@@ -98,5 +107,8 @@ void print_tree(tree_node *tree, const int indentation_level);
 /// @brief Processa um programa P- e retorna sua árvore sintática.
 /// @return O nó raíz da árvore sintática.
 tree_node * parse(void);
+
+void build_symbol_table(tree_node *tree);
+void check_types(tree_node *tree);
 
 #endif
