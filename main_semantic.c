@@ -2,30 +2,30 @@
 #include "parser/parser.h"
 #include "semantic/semantic.h"
 
+/// @brief Variável de depuração do Bison. 0 desativa o debug trace, 1 ativa o debug trace
 extern int yydebug;
 
 int main(int argc, char **argv)
 {
     yydebug = 0;
-    tree_node *syntaxTree = NULL;
-
+    
     if (argc < 2)
     {
         fprintf(stderr, "Uso: %s <arquivo_de_entrada>\n", argv[0]);
         return 1;
     }
-
+    
     yyin = fopen(argv[1], "r");
     if (!yyin)
     {
         fprintf(stderr, "Nao foi possivel abrir o arquivo %s\n", argv[1]);
         return 1;
     }
-
+    
     printf("Compilando o arquivo: %s\n", argv[1]);
     printf("-------------------------------------\n");
-
-    syntaxTree = parse();
+    
+    tree_node *syntaxTree = parse();
 
     if (syntaxTree != NULL)
     {

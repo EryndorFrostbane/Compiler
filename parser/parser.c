@@ -134,6 +134,7 @@ void print_tree(tree_node *tree, const int indentation_level)
 {
     while (tree != NULL)
     {
+        printf("L%d:\t", tree->line_number);
         print_spaces(indentation_level);
 
         if (tree->node_kind == STATEMENT_KIND)
