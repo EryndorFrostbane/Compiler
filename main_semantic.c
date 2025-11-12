@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     yyin = fopen(argv[1], "r");
     if (!yyin)
     {
-        fprintf(stderr, "Nao foi possivel abrir o arquivo %s\n", argv[1]);
+        fprintf(stderr, "Não foi possível abrir o arquivo %s\n", argv[1]);
         return 1;
     }
     
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     if (syntaxTree != NULL)
     {
-        printf("\nConstrucao da arvore sintatica finalizada.\n");
+        printf("\nConstrução da árvore sintática finalizada.\n");
         printf("-------------------------------------\n");
 
         // Análise semântica
@@ -42,11 +42,11 @@ int main(int argc, char **argv)
         generate_report(analyzer, report_filename);
 
         printf("\n-------------------------------------\n");
-        printf("Analise semantica concluida. Relatorio salvo em: %s\n", report_filename);
+        printf("Análise semântica concluída. Relatório salvo em: %s\n", report_filename);
     }
     else
     {
-        printf("\nNao foi possivel construir a arvore sintatica devido a erros.\n");
+        printf("\nNão foi possível construir a árvore sintática devido a erros.\n");
     }
 
     fclose(yyin);
