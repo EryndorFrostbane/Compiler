@@ -65,6 +65,10 @@ extern FILE *yyin;
 /// @return O token atual a ser processado.
 extern token get_token(void);
 
+/// @brief Imprime as informações de um token de forma organizada.
+/// @param token O token a ser impresso.
+void print_token(token *token);
+
 /*
  * Constantes internas que o Bison espera que existam.
  * Quando suprimimos a geracao do enum do Bison usando YYTOKENTYPE,

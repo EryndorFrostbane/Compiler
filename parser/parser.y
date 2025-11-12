@@ -10,6 +10,7 @@
 static char * savedName;
 static int savedLineNo;
 static tree_node * savedTree;
+static exp_type current_decl_type;
 
 /* Definicao da variavel global para o lexema do token */
 char *token_string;
@@ -47,7 +48,18 @@ static int yyerror(char *);
 
 program     : T_ABRE_CHAVES decl_list optional_stmt_seq T_FECHA_CHAVES
                 {
-                  savedTree = $3;
+                  // Concatena lista de declarações com statements
+                  tree_node *decls = $2;
+                  tree_node *stmts = $3;
+                  
+                  if (decls == NULL) {
+                    savedTree = stmts;
+                  } else {
+                    tree_node *last = decls;
+                    while (last->sibling != NULL) last = last->sibling;
+                    last->sibling = stmts;
+                    savedTree = decls;
+                  }
                 }
             ;
 
@@ -55,16 +67,48 @@ optional_stmt_seq : stmt_seq { $$ = $1; }
                   | /* empty */ { $$ = NULL; }
                   ;
 
-decl_list   : decl_list decl { $$ = $1; }
+decl_list   : decl_list decl { 
+                  if ($1 != NULL) {
+                    tree_node *t = $1;
+                    while (t->sibling != NULL) t = t->sibling;
+                    t->sibling = $2;
+                    $$ = $1;
+                  } else {
+                    $$ = $2;
+                  }
+                }
             | /* vazio */ { $$ = NULL; } 
             ;
 
-decl        : T_INTEIRO id_list T_PONTO_VIRGULA { $$ = NULL; }
-            | T_REAL id_list T_PONTO_VIRGULA { $$ = NULL; }
+decl        : T_INTEIRO id_list T_PONTO_VIRGULA 
+                { 
+                  current_decl_type = INTEGER;
+                  $$ = $2; 
+                }
+            | T_REAL id_list T_PONTO_VIRGULA
+                {
+                  current_decl_type = REAL;
+                  $$ = $2;
+                }
             ;
 
-id_list     : T_ID { $$ = NULL; }
-            | id_list T_VIRGULA T_ID { $$ = NULL; }
+id_list     : T_ID { 
+                  tree_node *t = new_statement_node(DECLARATION_STATEMENT);
+                  t->attribute.name = strdup(token_string);
+                  t->line_number = line_number;
+                  t->type = current_decl_type;
+                  $$ = t;
+                }
+            | id_list T_VIRGULA T_ID { 
+                  tree_node *t = new_statement_node(DECLARATION_STATEMENT);
+                  t->attribute.name = strdup(token_string);
+                  t->line_number = line_number;
+                  t->type = current_decl_type;
+                  tree_node *s = $1;
+                  while (s->sibling != NULL) s = s->sibling;
+                  s->sibling = t;
+                  $$ = $1;
+                }
             ;
 
 stmt_seq    : stmt_seq stmt
