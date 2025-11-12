@@ -62,3 +62,4 @@ main
 
 # VSCode
 .vscode/
+*.txt

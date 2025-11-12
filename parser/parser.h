@@ -37,7 +37,8 @@ typedef enum expression_kind
 {
     OPERATION_EXPRESSION,
     CONSTANT_EXPRESSION,
-    IDENTIFIER_EXPRESSION
+    IDENTIFIER_EXPRESSION,
+    CONVERSION_EXPRESSION
 } expression_kind;
 
 /// @brief Os possíveis tipos de variáveis.
@@ -78,7 +79,7 @@ extern char *token_string;
 /// @brief Imprime um token e seu lexema.
 /// @param token_type O tipo do token.
 /// @param lexeme O lexema.
-void print_token(token_type token_type, const char *lexeme);
+void print_node(token_type token_type, const char *lexeme);
 
 /// @brief Cria um nó de declaração para construção da árvore sintática.
 /// @param kind O tipo da declaração.
