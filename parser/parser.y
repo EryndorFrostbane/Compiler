@@ -10,7 +10,6 @@
 static char * savedName;
 static int savedLineNo;
 static tree_node * savedTree;
-static exp_type current_decl_type;
 
 /* Definicao da variavel global para o lexema do token */
 char *token_string;
@@ -28,7 +27,7 @@ static int yyerror(char *);
   #define YYTOKENTYPE token_type
 }
 
-/* --- Definicoes de Tokens (sem alteracoes) --- */
+/* --- Definicoes de Tokens --- */
 %token T_INTEIRO T_REAL
 %token T_SE T_ENTAO T_SENAO
 %token T_ENQUANTO T_REPITA T_ATE
@@ -44,7 +43,7 @@ static int yyerror(char *);
 %nonassoc "then"
 %nonassoc T_SENAO 
 
-%% /* --- Gramatica (sem alteracoes) --- */
+%% /* --- Gramatica --- */
 
 program     : T_ABRE_CHAVES decl_list optional_stmt_seq T_FECHA_CHAVES
                 {
@@ -82,12 +81,22 @@ decl_list   : decl_list decl {
 
 decl        : T_INTEIRO id_list T_PONTO_VIRGULA 
                 { 
-                  current_decl_type = INTEGER;
+                  // Para cada nó na lista de ids, definir o tipo como INTEGER
+                  tree_node *t = $2;
+                  while (t != NULL) {
+                    t->type = INTEGER;
+                    t = t->sibling;
+                  }
                   $$ = $2; 
                 }
             | T_REAL id_list T_PONTO_VIRGULA
                 {
-                  current_decl_type = REAL;
+                  // Para cada nó na lista de ids, definir o tipo como REAL
+                  tree_node *t = $2;
+                  while (t != NULL) {
+                    t->type = REAL;
+                    t = t->sibling;
+                  }
                   $$ = $2;
                 }
             ;
@@ -96,14 +105,14 @@ id_list     : T_ID {
                   tree_node *t = new_statement_node(DECLARATION_STATEMENT);
                   t->attribute.name = strdup(token_string);
                   t->line_number = line_number;
-                  t->type = current_decl_type;
+                  // O tipo será definido na regra decl
                   $$ = t;
                 }
             | id_list T_VIRGULA T_ID { 
                   tree_node *t = new_statement_node(DECLARATION_STATEMENT);
                   t->attribute.name = strdup(token_string);
                   t->line_number = line_number;
-                  t->type = current_decl_type;
+                  // O tipo será definido na regra decl
                   tree_node *s = $1;
                   while (s->sibling != NULL) s = s->sibling;
                   s->sibling = t;
@@ -176,7 +185,7 @@ command     : stmt { $$ = $1; }
 assign_stmt : T_ID { savedName = strdup(token_string);
                      savedLineNo = line_number;
                    }
-              T_ATRIBUICAO exp T_PONTO_VIRGULA /* << ADD SEMICOLON */
+              T_ATRIBUICAO exp T_PONTO_VIRGULA
                  { $$ = new_statement_node(ASSIGNMENT_STATEMENT);
                    if ($$)
                    {
@@ -190,13 +199,13 @@ assign_stmt : T_ID { savedName = strdup(token_string);
 read_stmt   : T_LER T_ABRE_PARENTESES T_ID { savedName = strdup(token_string);
                                                                 savedLineNo = line_number;
                                                               }
-                                                              T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
+                                                              T_FECHA_PARENTESES T_PONTO_VIRGULA
                  { $$ = new_statement_node(READ_STATEMENT);
                    if ($$) $$->attribute.name = savedName;
                  }
             ;
 
-write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES T_PONTO_VIRGULA /* << ADD SEMICOLON */
+write_stmt  : T_MOSTRAR T_ABRE_PARENTESES exp T_FECHA_PARENTESES T_PONTO_VIRGULA
                  { $$ = new_statement_node(WRITE_STATEMENT);
                    if ($$) $$->child[0] = $3;
                  }
