@@ -11,6 +11,7 @@ static void print_tree_to_file(FILE *file, tree_node *tree, int indentation_leve
     {
         for (int i = 0; i < indentation_level; i++)
             fprintf(file, " ");
+        fprintf(file, "L%d: ", tree->line_number); // Adicionar linha
 
         if (tree->node_kind == STATEMENT_KIND)
         {
@@ -107,6 +108,9 @@ static void print_tree_to_file(FILE *file, tree_node *tree, int indentation_leve
                 break;
             case IDENTIFIER_EXPRESSION:
                 fprintf(file, "Id: %s\n", tree->attribute.name);
+                break;
+            case CONVERSION_EXPRESSION: // Novo caso para conversão
+                fprintf(file, "Conversion: integer to real\n");
                 break;
             default:
                 fprintf(file, "Unknown expression node\n");
@@ -251,6 +255,15 @@ void report_error(semantic_analyzer *analyzer, int line, const char *format, ...
     va_end(args);
 }
 
+tree_node *create_conversion_node(tree_node *expr_node)
+{
+    tree_node *convert_node = new_expression_node(CONVERSION_EXPRESSION);
+    convert_node->child[0] = expr_node;
+    convert_node->type = REAL;
+    convert_node->line_number = expr_node->line_number;
+    return convert_node;
+}
+
 tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node)
 {
     symbol *sym = find_symbol(analyzer, node->attribute.name);
@@ -273,25 +286,21 @@ tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node)
         // Permitir atribuição de inteiro para real (conversão implícita)
         if (sym->type == DT_REAL && expr_type == DT_INTEGER)
         {
-            // Conversão implícita de inteiro para real
-            tree_node *convert_node = new_expression_node(OPERATION_EXPRESSION);
-            convert_node->attribute.op = T_ATRIBUICAO; // Marcador de conversão
-            convert_node->child[0] = node->child[0];
-            convert_node->type = REAL;
-            convert_node->line_number = node->line_number;
+            // Criar nó de conversão explícita
+            tree_node *convert_node = create_conversion_node(node->child[0]);
             node->child[0] = convert_node;
         }
         else if (sym->type == DT_INTEGER && expr_type == DT_REAL)
         {
-            // Não permitir atribuição de real para inteiro sem conversão explícita
+            // Não permitir atribuição de real para inteiro
             report_error(analyzer, node->line_number,
-                         "Atribuicao incompativel: variavel '%s' eh inteiro, expressao eh real",
+                         "Atribuição incompatível: variável '%s' é \"inteiro\", mas expressão é \"real\".",
                          node->attribute.name);
         }
         else
         {
             report_error(analyzer, node->line_number,
-                         "Atribuicao incompativel: tipos incompativeis");
+                         "Atribuição incompatível: tipos incompatíveis.");
         }
     }
     return node;
@@ -307,9 +316,6 @@ tree_node *adjust_operation(semantic_analyzer *analyzer, tree_node *node)
         return node; // Já reportou erro
     }
 
-    // Operadores booleanos já foram verificados em get_expression_type
-    // Operadores relacionais já foram verificados em get_expression_type
-
     // Para operadores aritméticos, ajustar tipos mistos
     if (node->attribute.op == T_SOMA || node->attribute.op == T_SUB ||
         node->attribute.op == T_MULT || node->attribute.op == T_DIV)
@@ -320,21 +326,13 @@ tree_node *adjust_operation(semantic_analyzer *analyzer, tree_node *node)
             if (left_type == DT_INTEGER && right_type == DT_REAL)
             {
                 // Converter left para real
-                tree_node *convert_node = new_expression_node(OPERATION_EXPRESSION);
-                convert_node->attribute.op = T_ATRIBUICAO;
-                convert_node->child[0] = node->child[0];
-                convert_node->type = REAL;
-                convert_node->line_number = node->line_number;
+                tree_node *convert_node = create_conversion_node(node->child[0]);
                 node->child[0] = convert_node;
             }
             else if (left_type == DT_REAL && right_type == DT_INTEGER)
             {
                 // Converter right para real
-                tree_node *convert_node = new_expression_node(OPERATION_EXPRESSION);
-                convert_node->attribute.op = T_ATRIBUICAO;
-                convert_node->child[0] = node->child[1];
-                convert_node->type = REAL;
-                convert_node->line_number = node->line_number;
+                tree_node *convert_node = create_conversion_node(node->child[1]);
                 node->child[1] = convert_node;
             }
         }
@@ -471,19 +469,19 @@ void analyze_semantics(semantic_analyzer *analyzer)
 void generate_report(semantic_analyzer *analyzer, const char *filename)
 {
     // Imprimir no console
-    printf("=== RELATORIO DE ANALISE SEMANTICA ===\n\n");
+    printf("=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n\n");
 
-    printf("1. ARVORE SINTATICA ORIGINAL:\n");
+    printf("1. ÁRVORE SINTÁTICA ORIGINAL:\n");
     printf("----------------------------------------\n");
     print_tree(analyzer->original_tree, 0);
 
-    printf("\n2. ARVORE APOS AJUSTES SEMANTICOS:\n");
+    printf("\n2. ÁRVORE APOS AJUSTES SEMÂNTICOS:\n");
     printf("----------------------------------------\n");
     print_tree(analyzer->adjusted_tree, 0);
 
-    printf("\n3. TABELA DE SIMBOLOS:\n");
+    printf("\n3. TABELA DE SÍMBOLOS:\n");
     printf("----------------------------------------\n");
-    printf("%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereco", "Tamanho");
+    printf("%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereço", "Tamanho");
     printf("----------------------------------------\n");
     for (int i = 0; i < analyzer->table.count; i++)
     {
@@ -495,11 +493,11 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
                sym->size);
     }
 
-    printf("\n4. ERROS SEMANTICOS:\n");
+    printf("\n4. ERROS SEMÂNTICOS:\n");
     printf("----------------------------------------\n");
     if (analyzer->error_count == 0)
     {
-        printf("Nenhum erro semantico encontrado.\n");
+        printf("Nenhum erro semântico encontrado.\n");
     }
     else
     {
@@ -515,23 +513,23 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
     FILE *report = fopen(filename, "w");
     if (!report)
     {
-        fprintf(stderr, "Erro ao criar arquivo de relatorio: %s\n", filename);
+        fprintf(stderr, "Erro ao criar arquivo de relatório: %s\n", filename);
         return;
     }
 
-    fprintf(report, "=== RELATORIO DE ANALISE SEMANTICA ===\n\n");
+    fprintf(report, "=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n\n");
 
-    fprintf(report, "1. ARVORE SINTATICA ORIGINAL:\n");
+    fprintf(report, "1. ÁRVORE SINTÁTICA ORIGINAL:\n");
     fprintf(report, "----------------------------------------\n");
     print_tree_to_file(report, analyzer->original_tree, 0);
 
-    fprintf(report, "\n2. ARVORE APOS AJUSTES SEMANTICOS:\n");
+    fprintf(report, "\n2. ÁRVORE APÓS AJUSTES SEMÂNTICOS:\n");
     fprintf(report, "----------------------------------------\n");
     print_tree_to_file(report, analyzer->adjusted_tree, 0);
 
-    fprintf(report, "\n3. TABELA DE SIMBOLOS:\n");
+    fprintf(report, "\n3. TABELA DE SÍMBOLOS:\n");
     fprintf(report, "----------------------------------------\n");
-    fprintf(report, "%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereco", "Tamanho");
+    fprintf(report, "%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereço", "Tamanho");
     fprintf(report, "----------------------------------------\n");
     for (int i = 0; i < analyzer->table.count; i++)
     {
@@ -543,11 +541,11 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
                 sym->size);
     }
 
-    fprintf(report, "\n4. ERROS SEMANTICOS:\n");
+    fprintf(report, "\n4. ERROS SEMÂNTICOS:\n");
     fprintf(report, "----------------------------------------\n");
     if (analyzer->error_count == 0)
     {
-        fprintf(report, "Nenhum erro semantico encontrado.\n");
+        fprintf(report, "Nenhum erro semântico encontrado.\n");
     }
     else
     {

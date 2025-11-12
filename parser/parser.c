@@ -192,6 +192,9 @@ void print_tree(tree_node *tree, const int indentation_level)
             case IDENTIFIER_EXPRESSION:
                 printf("Id: %s\n", tree->attribute.name);
                 break;
+            case CONVERSION_EXPRESSION:
+                printf("Conversion: integer -> real\n");
+                break;
             default:
                 printf("Unknown expression node\n");
                 break;

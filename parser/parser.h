@@ -37,7 +37,8 @@ typedef enum expression_kind
 {
     OPERATION_EXPRESSION,
     CONSTANT_EXPRESSION,
-    IDENTIFIER_EXPRESSION
+    IDENTIFIER_EXPRESSION,
+    CONVERSION_EXPRESSION
 } expression_kind;
 
 /// @brief Os possíveis tipos de variáveis.

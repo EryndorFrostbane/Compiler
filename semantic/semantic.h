@@ -57,6 +57,7 @@ symbol *find_symbol(semantic_analyzer *analyzer, const char *name);
 void report_error(semantic_analyzer *analyzer, int line, const char *format, ...);
 
 // Funções de ajuste da árvore
+tree_node *create_conversion_node(tree_node *expr_node);
 tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node);
 tree_node *adjust_operation(semantic_analyzer *analyzer, tree_node *node);
 tree_node *adjust_expression(semantic_analyzer *analyzer, tree_node *node);
