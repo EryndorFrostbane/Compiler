@@ -4,6 +4,23 @@
 #include <string.h>
 #include "semantic.h"
 
+static void check_boolean_condition(semantic_analyzer *analyzer, tree_node *condition_node, int line_number, const char *statement_type)
+{
+    if (condition_node == NULL)
+        return;
+
+    data_type cond_type = get_expression_type_without_init_check(analyzer, condition_node);
+
+    if (cond_type != DT_BOOLEAN && cond_type != DT_VOID)
+    {
+        report_error(analyzer, line_number,
+                     "Condicao do %s deve ser booleana, mas encontrou tipo %s",
+                     statement_type,
+                     (cond_type == DT_INTEGER) ? "inteiro" : (cond_type == DT_REAL) ? "real"
+                                                                                    : "desconhecido");
+    }
+}
+
 static void print_tree_to_file(FILE *file, tree_node *tree, int indentation_level)
 {
     while (tree != NULL)
@@ -158,7 +175,6 @@ data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node)
                 report_error(analyzer, node->line_number, "Variavel '%s' nao declarada", node->attribute.name);
                 return DT_VOID;
             }
-            // Removida a verificação de inicialização - será feita em adjust_expression
             return sym->type;
         }
         case CONSTANT_EXPRESSION:
@@ -429,6 +445,8 @@ tree_node *adjust_expression(semantic_analyzer *analyzer, tree_node *node)
             symbol *sym = find_symbol(analyzer, node->attribute.name);
             if (sym != NULL && !sym->is_initialized)
             {
+                // Não verificar inicialização em contextos booleanos (será verificado separadamente)
+                // Mas para outros contextos, reportar erro
                 report_error(analyzer, node->line_number, "Variavel '%s' nao inicializada", node->attribute.name);
             }
             break;
@@ -536,7 +554,7 @@ tree_node *adjust_tree(semantic_analyzer *analyzer, tree_node *node)
             if (cond_type != DT_BOOLEAN && cond_type != DT_VOID)
             {
                 report_error(analyzer, node->line_number,
-                             "Condicao deve ser booleana");
+                             "Condição deve ser booleana");
             }
             break;
         }
@@ -608,17 +626,21 @@ tree_node *adjust_tree_sequential(semantic_analyzer *analyzer, tree_node *node)
                 break;
             }
             case IF_STATEMENT:
+            {
+                // Verificar se a condição é booleana
+                check_boolean_condition(analyzer, current->child[0], current->line_number, "se");
+                break;
+            }
             case WHILE_STATEMENT:
+            {
+                // Verificar se a condição é booleana
+                check_boolean_condition(analyzer, current->child[0], current->line_number, "enquanto");
+                break;
+            }
             case REPEAT_STATEMENT:
             {
-                // A expressão será ajustada pelo loop de filhos abaixo
                 // Verificar se a condição é booleana
-                data_type cond_type = get_expression_type_without_init_check(analyzer, current->child[0]);
-                if (cond_type != DT_BOOLEAN && cond_type != DT_VOID)
-                {
-                    report_error(analyzer, current->line_number,
-                                 "Condicao deve ser booleana");
-                }
+                check_boolean_condition(analyzer, current->child[1], current->line_number, "repita");
                 break;
             }
             }
