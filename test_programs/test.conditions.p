@@ -3,7 +3,9 @@
     a = 10;
     b = 5;
 
+
     /* Condições válidas */
+
     se (a > b) entao
     {
         mostrar(a);

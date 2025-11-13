@@ -1,6 +1,8 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include <stdio.h>
+
 /// @brief Representa todos os possíveis tipos de tokens da linguagem P-
 typedef enum token_type
 {

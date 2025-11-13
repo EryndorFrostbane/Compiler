@@ -72,7 +72,7 @@ typedef struct tree_node
         char *name;
     } attribute;
     exp_type type;
-    int processed; //c 0 = não processado, 1 = processado
+    int processed; // 0 = não processado, 1 = processado
 } tree_node;
 
 /// @brief Variável global para armazenar o lexema do token.
