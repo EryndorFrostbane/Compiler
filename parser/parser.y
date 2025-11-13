@@ -134,7 +134,7 @@ stmt_seq    : stmt_seq stmt
             ;
 
 stmt        : if_stmt { $$ = $1; }
-            | repeat_stmt { $$ = $1; }
+            | repeat_stmt T_PONTO_VIRGULA { $$ = $1; }
             | while_stmt { $$ = $1; }
             | assign_stmt { $$ = $1; }
             | read_stmt { $$ = $1; }

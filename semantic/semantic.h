@@ -21,6 +21,7 @@ typedef struct symbol
     int declared_line;
     int memory_address;
     int size;
+    int is_initialized; // 0 = não inicializada, 1 = inicializada
 } symbol;
 
 typedef struct symbol_table
@@ -52,6 +53,7 @@ void generate_report(semantic_analyzer *analyzer, const char *filename);
 
 // Funções auxiliares
 data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node);
+data_type get_expression_type_without_init_check(semantic_analyzer *analyzer, tree_node *node);
 void add_symbol(semantic_analyzer *analyzer, const char *name, data_type type, int line);
 symbol *find_symbol(semantic_analyzer *analyzer, const char *name);
 void report_error(semantic_analyzer *analyzer, int line, const char *format, ...);
@@ -62,5 +64,6 @@ tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node);
 tree_node *adjust_operation(semantic_analyzer *analyzer, tree_node *node);
 tree_node *adjust_expression(semantic_analyzer *analyzer, tree_node *node);
 tree_node *adjust_tree(semantic_analyzer *analyzer, tree_node *node);
+tree_node *adjust_tree_sequential(semantic_analyzer *analyzer, tree_node *node);
 
 #endif
