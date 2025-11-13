@@ -46,7 +46,8 @@ typedef enum exp_type
 {
     VOID,
     INTEGER,
-    REAL
+    REAL,
+    PROCESSED_MARKER = 999 // Marcador para nós já processados
 } exp_type;
 
 #define MAXCHILDREN 3
@@ -71,6 +72,7 @@ typedef struct tree_node
         char *name;
     } attribute;
     exp_type type;
+    int processed; //c 0 = não processado, 1 = processado
 } tree_node;
 
 /// @brief Variável global para armazenar o lexema do token.

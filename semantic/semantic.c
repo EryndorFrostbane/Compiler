@@ -4,14 +4,13 @@
 #include <string.h>
 #include "semantic.h"
 
-// Função auxiliar para imprimir árvore em arquivo
 static void print_tree_to_file(FILE *file, tree_node *tree, int indentation_level)
 {
     while (tree != NULL)
     {
         for (int i = 0; i < indentation_level; i++)
             fprintf(file, " ");
-        fprintf(file, "L%d: ", tree->line_number); // Adicionar linha
+        fprintf(file, "L%d: ", tree->line_number);
 
         if (tree->node_kind == STATEMENT_KIND)
         {
@@ -109,7 +108,7 @@ static void print_tree_to_file(FILE *file, tree_node *tree, int indentation_leve
             case IDENTIFIER_EXPRESSION:
                 fprintf(file, "Id: %s\n", tree->attribute.name);
                 break;
-            case CONVERSION_EXPRESSION: // Novo caso para conversão
+            case CONVERSION_EXPRESSION:
                 fprintf(file, "Conversion: integer to real\n");
                 break;
             default:
@@ -159,6 +158,7 @@ data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node)
                 report_error(analyzer, node->line_number, "Variavel '%s' nao declarada", node->attribute.name);
                 return DT_VOID;
             }
+            // Removida a verificação de inicialização - será feita em adjust_expression
             return sym->type;
         }
         case CONSTANT_EXPRESSION:
@@ -168,7 +168,7 @@ data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node)
             data_type left_type = get_expression_type(analyzer, node->child[0]);
             data_type right_type = get_expression_type(analyzer, node->child[1]);
 
-            // Para operadores booleanos, verificar operandos e retornar booleano
+            // Para operadores booleanos
             if (node->attribute.op == T_E || node->attribute.op == T_OU)
             {
                 if (left_type != DT_BOOLEAN || right_type != DT_BOOLEAN)
@@ -179,7 +179,7 @@ data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node)
                 return DT_BOOLEAN;
             }
 
-            // Para operadores relacionais, verificar operandos numéricos e retornar booleano
+            // Para operadores relacionais
             if (node->attribute.op == T_MENOR || node->attribute.op == T_MAIOR ||
                 node->attribute.op == T_IGUAL || node->attribute.op == T_DIFERENTE ||
                 node->attribute.op == T_MENOR_IGUAL || node->attribute.op == T_MAIOR_IGUAL)
@@ -194,13 +194,66 @@ data_type get_expression_type(semantic_analyzer *analyzer, tree_node *node)
                 return DT_BOOLEAN;
             }
 
-            // Para operadores aritméticos, determinar o tipo resultante
+            // Para operadores aritméticos
             if (left_type == DT_REAL || right_type == DT_REAL)
             {
                 return DT_REAL;
             }
             return DT_INTEGER;
         }
+        }
+    }
+    return DT_VOID;
+}
+
+data_type get_expression_type_without_init_check(semantic_analyzer *analyzer, tree_node *node)
+{
+    if (node == NULL)
+        return DT_VOID;
+
+    if (node->node_kind == EXPRESSION_KIND)
+    {
+        switch (node->kind.exp)
+        {
+        case IDENTIFIER_EXPRESSION:
+        {
+            symbol *sym = find_symbol(analyzer, node->attribute.name);
+            if (sym == NULL)
+            {
+                return DT_VOID;
+            }
+            return sym->type;
+        }
+        case CONSTANT_EXPRESSION:
+            return (node->type == INTEGER) ? DT_INTEGER : DT_REAL;
+        case OPERATION_EXPRESSION:
+        {
+            data_type left_type = get_expression_type_without_init_check(analyzer, node->child[0]);
+            data_type right_type = get_expression_type_without_init_check(analyzer, node->child[1]);
+
+            // Para operadores booleanos
+            if (node->attribute.op == T_E || node->attribute.op == T_OU)
+            {
+                return DT_BOOLEAN;
+            }
+
+            // Para operadores relacionais
+            if (node->attribute.op == T_MENOR || node->attribute.op == T_MAIOR ||
+                node->attribute.op == T_IGUAL || node->attribute.op == T_DIFERENTE ||
+                node->attribute.op == T_MENOR_IGUAL || node->attribute.op == T_MAIOR_IGUAL)
+            {
+                return DT_BOOLEAN;
+            }
+
+            // Para operadores aritméticos
+            if (left_type == DT_REAL || right_type == DT_REAL)
+            {
+                return DT_REAL;
+            }
+            return DT_INTEGER;
+        }
+        case CONVERSION_EXPRESSION:
+            return DT_REAL;
         }
     }
     return DT_VOID;
@@ -224,6 +277,7 @@ void add_symbol(semantic_analyzer *analyzer, const char *name, data_type type, i
     sym->name = strdup(name);
     sym->type = type;
     sym->declared_line = line;
+    sym->is_initialized = 0; // Inicialmente não inicializada
 
     sym->memory_address = analyzer->table.next_address;
     sym->size = (type == DT_INTEGER) ? 4 : 8;
@@ -303,13 +357,28 @@ tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node)
                          "Atribuição incompatível: tipos incompatíveis.");
         }
     }
+
+    // Marcar a variável como inicializada após atribuição válida
+    // Verificar se não houve erro antes de marcar como inicializada
+    int had_error_before = analyzer->error_count;
+
+    // Se não houve erro novo durante esta atribuição, marcar como inicializada
+    if (analyzer->error_count == had_error_before)
+    {
+        sym->is_initialized = 1;
+    }
+
     return node;
 }
 
 tree_node *adjust_operation(semantic_analyzer *analyzer, tree_node *node)
 {
-    data_type left_type = get_expression_type(analyzer, node->child[0]);
-    data_type right_type = get_expression_type(analyzer, node->child[1]);
+    // Não chamar get_expression_type aqui - isso causa processamento duplicado
+    // A verificação de tipos já foi feita em adjust_expression
+
+    // Apenas ajustar conversões de tipo se necessário
+    data_type left_type = get_expression_type_without_init_check(analyzer, node->child[0]);
+    data_type right_type = get_expression_type_without_init_check(analyzer, node->child[1]);
 
     if (left_type == DT_VOID || right_type == DT_VOID)
     {
@@ -346,18 +415,41 @@ tree_node *adjust_expression(semantic_analyzer *analyzer, tree_node *node)
     if (node == NULL)
         return NULL;
 
-    if (node->node_kind == EXPRESSION_KIND &&
-        node->kind.exp == OPERATION_EXPRESSION)
+    // Se este nó já foi processado, retornar imediatamente
+    if (node->processed)
+        return node;
+
+    if (node->node_kind == EXPRESSION_KIND)
     {
-        node = adjust_operation(analyzer, node);
+        switch (node->kind.exp)
+        {
+        case IDENTIFIER_EXPRESSION:
+        {
+            // Verificar inicialização apenas uma vez aqui
+            symbol *sym = find_symbol(analyzer, node->attribute.name);
+            if (sym != NULL && !sym->is_initialized)
+            {
+                report_error(analyzer, node->line_number, "Variavel '%s' nao inicializada", node->attribute.name);
+            }
+            break;
+        }
+        case OPERATION_EXPRESSION:
+            node = adjust_operation(analyzer, node);
+            break;
+        }
     }
+
+    // Marcar como processado antes de processar os filhos
+    node->processed = 1;
 
     for (int i = 0; i < MAXCHILDREN; i++)
     {
-        node->child[i] = adjust_expression(analyzer, node->child[i]);
+        if (node->child[i] != NULL)
+        {
+            adjust_expression(analyzer, node->child[i]);
+        }
     }
 
-    node->sibling = adjust_expression(analyzer, node->sibling);
     return node;
 }
 
@@ -398,13 +490,7 @@ tree_node *adjust_tree(semantic_analyzer *analyzer, tree_node *node)
     if (node == NULL)
         return NULL;
 
-    // Primeiro processar os filhos
-    for (int i = 0; i < MAXCHILDREN; i++)
-    {
-        node->child[i] = adjust_tree(analyzer, node->child[i]);
-    }
-
-    // Depois processar o nó atual
+    // Primeiro processar o nó atual
     if (node->node_kind == STATEMENT_KIND)
     {
         switch (node->kind.stmt)
@@ -424,6 +510,11 @@ tree_node *adjust_tree(semantic_analyzer *analyzer, tree_node *node)
             {
                 report_error(analyzer, node->line_number,
                              "Leitura so permitida para variaveis numericas");
+            }
+            else
+            {
+                // Marcar a variável como inicializada após leitura
+                sym->is_initialized = 1;
             }
             break;
         }
@@ -452,7 +543,13 @@ tree_node *adjust_tree(semantic_analyzer *analyzer, tree_node *node)
         }
     }
 
-    // Processar irmãos
+    // Depois processar os filhos
+    for (int i = 0; i < MAXCHILDREN; i++)
+    {
+        node->child[i] = adjust_tree(analyzer, node->child[i]);
+    }
+
+    // Finalmente processar os irmãos (em ordem sequencial)
     node->sibling = adjust_tree(analyzer, node->sibling);
     return node;
 }
@@ -462,8 +559,84 @@ void analyze_semantics(semantic_analyzer *analyzer)
     // Primeiro processar declarações para construir a tabela de símbolos
     process_declarations(analyzer, analyzer->original_tree);
 
-    // Depois ajustar a árvore com verificações semânticas
-    analyzer->adjusted_tree = adjust_tree(analyzer, analyzer->original_tree);
+    // Depois ajustar a árvore com verificações semânticas - usando processamento sequencial
+    analyzer->adjusted_tree = adjust_tree_sequential(analyzer, analyzer->original_tree);
+}
+
+tree_node *adjust_tree_sequential(semantic_analyzer *analyzer, tree_node *node)
+{
+    tree_node *current = node;
+    while (current != NULL)
+    {
+        // Processar o nó atual
+        if (current->node_kind == STATEMENT_KIND)
+        {
+            switch (current->kind.stmt)
+            {
+            case ASSIGNMENT_STATEMENT:
+                current = adjust_assignment(analyzer, current);
+                break;
+            case READ_STATEMENT:
+            {
+                symbol *sym = find_symbol(analyzer, current->attribute.name);
+                if (sym == NULL)
+                {
+                    report_error(analyzer, current->line_number,
+                                 "Variavel '%s' nao declarada", current->attribute.name);
+                }
+                else if (sym->type != DT_INTEGER && sym->type != DT_REAL)
+                {
+                    report_error(analyzer, current->line_number,
+                                 "Leitura so permitida para variaveis numericas");
+                }
+                else
+                {
+                    sym->is_initialized = 1;
+                }
+                break;
+            }
+            case WRITE_STATEMENT:
+            {
+                // A expressão será ajustada pelo loop de filhos abaixo
+                // Verificar se a expressão é numérica
+                data_type expr_type = get_expression_type_without_init_check(analyzer, current->child[0]);
+                if (expr_type != DT_INTEGER && expr_type != DT_REAL && expr_type != DT_VOID)
+                {
+                    report_error(analyzer, current->line_number,
+                                 "Escrita so permitida para expressoes numericas");
+                }
+                break;
+            }
+            case IF_STATEMENT:
+            case WHILE_STATEMENT:
+            case REPEAT_STATEMENT:
+            {
+                // A expressão será ajustada pelo loop de filhos abaixo
+                // Verificar se a condição é booleana
+                data_type cond_type = get_expression_type_without_init_check(analyzer, current->child[0]);
+                if (cond_type != DT_BOOLEAN && cond_type != DT_VOID)
+                {
+                    report_error(analyzer, current->line_number,
+                                 "Condicao deve ser booleana");
+                }
+                break;
+            }
+            }
+        }
+
+        // Processar os filhos (expressões) do nó atual - APENAS UMA VEZ
+        for (int i = 0; i < MAXCHILDREN; i++)
+        {
+            if (current->child[i] != NULL)
+            {
+                adjust_expression(analyzer, current->child[i]);
+            }
+        }
+
+        // Processar o próximo irmão
+        current = current->sibling;
+    }
+    return node;
 }
 
 void generate_report(semantic_analyzer *analyzer, const char *filename)
@@ -481,16 +654,17 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
 
     printf("\n3. TABELA DE SÍMBOLOS:\n");
     printf("----------------------------------------\n");
-    printf("%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereço", "Tamanho");
+    printf("%-15s %-10s %-10s %-10s %-12s\n", "Nome", "Tipo", "Endereço", "Tamanho", "Inicializada");
     printf("----------------------------------------\n");
     for (int i = 0; i < analyzer->table.count; i++)
     {
         symbol *sym = &analyzer->table.symbols[i];
-        printf("%-15s %-10s %-10d %-10d\n",
+        printf("%-15s %-10s %-10d %-10d %-12s\n",
                sym->name,
                (sym->type == DT_INTEGER) ? "inteiro" : "real",
                sym->memory_address,
-               sym->size);
+               sym->size,
+               sym->is_initialized ? "sim" : "nao");
     }
 
     printf("\n4. ERROS SEMÂNTICOS:\n");

@@ -101,6 +101,7 @@ tree_node *new_statement_node(statement_kind kind)
         t->node_kind = STATEMENT_KIND;
         t->kind.stmt = kind;
         t->line_number = line_number;
+        t->processed = 0; // Inicializar como não processado
     }
     return t;
 }
@@ -120,6 +121,7 @@ tree_node *new_expression_node(expression_kind kind)
         t->kind.exp = kind;
         t->line_number = line_number;
         t->type = VOID;
+        t->processed = 0; // Inicializar como não processado
     }
     return t;
 }
@@ -176,18 +178,18 @@ void print_tree(tree_node *tree, const int indentation_level)
                 print_node(tree->attribute.op, "\0");
                 break;
             case CONSTANT_EXPRESSION:
-                switch (tree->type)
+                if (tree->type == INTEGER)
                 {
-                    case INTEGER:
-                        printf("Const: %d\n", tree->attribute.int_value);
-                        break;
-                    case REAL:
-                        printf("Const: %f\n", tree->attribute.real_value);
-                        break;
-                    default:
-                        printf("Const (Unknown Type): %d\n", tree->attribute.int_value);
-                        break;
-                    }
+                    printf("Const: %d\n", tree->attribute.int_value);
+                }
+                else if (tree->type == REAL)
+                {
+                    printf("Const: %f\n", tree->attribute.real_value);
+                }
+                else
+                {
+                    printf("Const (Unknown Type): %d\n", tree->attribute.int_value);
+                }
                 break;
             case IDENTIFIER_EXPRESSION:
                 printf("Id: %s\n", tree->attribute.name);
