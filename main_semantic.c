@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     if (syntaxTree != NULL)
     {
-        printf("\nConstrução da árvore sintática finalizada.\n");
+        printf("\nConstrucao da arvore sintatica finalizada.\n");
         printf("-------------------------------------\n");
 
         // Análise semântica
@@ -42,11 +42,11 @@ int main(int argc, char **argv)
         generate_report(analyzer, report_filename);
 
         printf("\n-------------------------------------\n");
-        printf("Análise semântica concluída. Relatório salvo em: %s\n", report_filename);
+        printf("Analise semantica concluida. Relatorio salvo em: %s\n", report_filename);
     }
     else
     {
-        printf("\nNão foi possível construir a árvore sintática devido a erros.\n");
+        printf("\nNao foi possivel construir a arvore sintatica devido a erros.\n");
     }
 
     fclose(yyin);

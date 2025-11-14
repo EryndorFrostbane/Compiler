@@ -364,13 +364,13 @@ tree_node *adjust_assignment(semantic_analyzer *analyzer, tree_node *node)
         {
             // Não permitir atribuição de real para inteiro
             report_error(analyzer, node->line_number,
-                         "Atribuição incompatível: variável '%s' é \"inteiro\", mas expressão é \"real\".",
+                         "Atribuicao incompativel: variavel '%s' e \"inteiro\", mas expressao e \"real\".",
                          node->attribute.name);
         }
         else
         {
             report_error(analyzer, node->line_number,
-                         "Atribuição incompatível: tipos incompatíveis.");
+                         "Atribuicao incompativel: tipos incompativeis.");
         }
     }
 
@@ -664,19 +664,19 @@ tree_node *adjust_tree_sequential(semantic_analyzer *analyzer, tree_node *node)
 void generate_report(semantic_analyzer *analyzer, const char *filename)
 {
     // Imprimir no console
-    printf("=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n\n");
+    printf("=== RELATORIO DE ANALISE SEMANTICA ===\n\n");
 
-    printf("1. ÁRVORE SINTÁTICA ORIGINAL:\n");
+    printf("1. ARVORE SINTATICA ORIGINAL:\n");
     printf("----------------------------------------\n");
     print_tree(analyzer->original_tree, 0);
 
-    printf("\n2. ÁRVORE APOS AJUSTES SEMÂNTICOS:\n");
+    printf("\n2. ARVORE APOS AJUSTES SEMANTICOS:\n");
     printf("----------------------------------------\n");
     print_tree(analyzer->adjusted_tree, 0);
 
-    printf("\n3. TABELA DE SÍMBOLOS:\n");
+    printf("\n3. TABELA DE SIMBOLOS:\n");
     printf("----------------------------------------\n");
-    printf("%-15s %-10s %-10s %-10s %-12s\n", "Nome", "Tipo", "Endereço", "Tamanho", "Inicializada");
+    printf("%-15s %-10s %-10s %-10s %-12s\n", "Nome", "Tipo", "Endereco", "Tamanho", "Inicializada");
     printf("----------------------------------------\n");
     for (int i = 0; i < analyzer->table.count; i++)
     {
@@ -689,11 +689,11 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
                sym->is_initialized ? "sim" : "nao");
     }
 
-    printf("\n4. ERROS SEMÂNTICOS:\n");
+    printf("\n4. ERROS SEMANTICOS:\n");
     printf("----------------------------------------\n");
     if (analyzer->error_count == 0)
     {
-        printf("Nenhum erro semântico encontrado.\n");
+        printf("Nenhum erro semantico encontrado.\n");
     }
     else
     {
@@ -709,23 +709,23 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
     FILE *report = fopen(filename, "w");
     if (!report)
     {
-        fprintf(stderr, "Erro ao criar arquivo de relatório: %s\n", filename);
+        fprintf(stderr, "Erro ao criar arquivo de relatorio: %s\n", filename);
         return;
     }
 
-    fprintf(report, "=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n\n");
+    fprintf(report, "=== RELATORIO DE ANALISE SEMANTICA ===\n\n");
 
-    fprintf(report, "1. ÁRVORE SINTÁTICA ORIGINAL:\n");
+    fprintf(report, "1. ARVORE SINTATICA ORIGINAL:\n");
     fprintf(report, "----------------------------------------\n");
     print_tree_to_file(report, analyzer->original_tree, 0);
 
-    fprintf(report, "\n2. ÁRVORE APÓS AJUSTES SEMÂNTICOS:\n");
+    fprintf(report, "\n2. ARVORE APOS AJUSTES SEMANTICOS:\n");
     fprintf(report, "----------------------------------------\n");
     print_tree_to_file(report, analyzer->adjusted_tree, 0);
 
-    fprintf(report, "\n3. TABELA DE SÍMBOLOS:\n");
+    fprintf(report, "\n3. TABELA DE SIMBOLOS:\n");
     fprintf(report, "----------------------------------------\n");
-    fprintf(report, "%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereço", "Tamanho");
+    fprintf(report, "%-15s %-10s %-10s %-10s\n", "Nome", "Tipo", "Endereco", "Tamanho");
     fprintf(report, "----------------------------------------\n");
     for (int i = 0; i < analyzer->table.count; i++)
     {
@@ -737,11 +737,11 @@ void generate_report(semantic_analyzer *analyzer, const char *filename)
                 sym->size);
     }
 
-    fprintf(report, "\n4. ERROS SEMÂNTICOS:\n");
+    fprintf(report, "\n4. ERROS SEMANTICOS:\n");
     fprintf(report, "----------------------------------------\n");
     if (analyzer->error_count == 0)
     {
-        fprintf(report, "Nenhum erro semântico encontrado.\n");
+        fprintf(report, "Nenhum erro semantico encontrado.\n");
     }
     else
     {
